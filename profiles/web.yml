@@ -23,3 +23,5 @@
 
 - name: '@mini-dsh/host-session-manager'
 
+- name: '@mini-dsh/host-hmr'
+

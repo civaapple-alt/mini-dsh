@@ -45,7 +45,7 @@ if (typeof pluginMod.Config === 'function') {
 ### 为什么需要 HMR？
 在生产环境或 Agent **自修改（Self-Modification）** 模式下，修改插件配置或代码不应强行重启整个 Node.js 进程，而是通过事件通知与 Cordis 的 `ctx.effect()` 自动执行旧资源释放（Disposer）并热装载新逻辑。
 
-### `HmrService` 的极简实现
+### 2.1 Host 端文件监听与清理
 在 `packages/host/hmr/src/index.ts` 中：
 ```ts
 export class HmrService extends Service {
@@ -62,6 +62,40 @@ export class HmrService extends Service {
   }
 }
 ```
+
+### 2.2 Web 端双端联动 HMR（Host SSE 广播 + Browser Fiber 热重载）
+
+Web 界面的 HMR 是全栈双端协作的过程：
+
+```text
+┌─────────────────────────┐                         ┌─────────────────────────┐
+│ 1. Host 端 (Node.js)    │                         │ 2. Browser 端 (Web GUI) │
+│    @mini-dsh/host-hmr   │                         │    packages/client/shell│
+└───────────┬─────────────┘                         └───────────┬─────────────┘
+            │                                                   │
+            │  GET /api/hmr/events (Server-Sent Events 连接)    │
+            │ ◄─────────────────────────────────────────────────┤
+            │                                                   │
+   [检测到 client.js 重新打包]                                  │
+   [或收到 POST /api/hmr/trigger]                               │
+            │                                                   │
+            │  SSE 广播: data: {"type":"reload", "id":"..."}    │
+            ├─────────────────────────────────────────────────► │
+            │                                                   │
+            │                                         [1. oldFiber.dispose()]
+            │                                             (清理旧插槽组件)
+            │                                         [2. dynamic import(url)]
+            │                                             (带时间戳拉取新 Bundle)
+            │                                         [3. ctx.plugin(newMod)]
+            │                                             (新组件即刻上屏，零刷新)
+            │                                         [4. 弹出 HMR Toast 动画]
+```
+
+1. **Host 侧**：提供 `/api/hmr/events` SSE 流，并在 `packages/plugins/*/lib/client.js` 发生变动时广播重载事件；
+2. **Client 侧（`client-shell`）**：
+   - 监听到 SSE 重载事件时，调用旧插件的 `oldFiber.dispose()`（自底向上卸载旧 Slot UI）；
+   - 使用带时间戳的 URL 动态 `import(newUrl)` 重新加载前端 Bundle；
+   - 重新执行 `ctx.plugin(newMod)`，新 UI 自动挂载到插槽，**完全无需手动刷新网页**！
 
 ---
 

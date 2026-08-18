@@ -228,6 +228,24 @@ export class ClientModuleService extends Service {
       <div id="slot-sidebar-widgets" class="slot-container">
         <div style="color: var(--text-muted); font-size: 0.875rem;">Waiting for plugins to mount...</div>
       </div>
+
+      <div class="card" style="margin-top: 1.5rem; background: #182234; border: 1px solid #3b82f6;">
+        <h3 style="color: #60a5fa; font-size: 0.95rem; margin-bottom: 0.5rem;">🔥 Web HMR Control</h3>
+        <div id="hmr-status-indicator" style="font-size: 0.75rem; margin-bottom: 0.75rem;">
+          <span style="color: #94a3b8;">Connecting to SSE...</span>
+        </div>
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+          点击下方按钮模拟修改前端 Bundle 并通过 SSE 触发客户端组件热替换（无需刷新浏览器）：
+        </p>
+        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+          <button onclick="fetch('/api/hmr/trigger?plugin=@mini-dsh/plugin-greeter', {method:'POST'})" style="background: #2563eb; font-size: 0.8rem; padding: 0.4rem 0.6rem;">
+            ⚡ 触发 Greeter 卡片热重载
+          </button>
+          <button onclick="fetch('/api/hmr/trigger?plugin=@mini-dsh/plugin-counter', {method:'POST'})" style="background: #0d9488; font-size: 0.8rem; padding: 0.4rem 0.6rem;">
+            ⚡ 触发 Counter 组件热重载
+          </button>
+        </div>
+      </div>
     </aside>
     <main>
       <div class="section-title">Main Content Slot (<code>main.cards</code>)</div>

@@ -11,5 +11,8 @@
     "@deepseek-ai/cordis": "^4.0.1",
     "chokidar": "^5.0.0",
     "schemastery": "^3.18.0"
+  },
+  "devDependencies": {
+    "@mini-dsh/host-webserver": "workspace:*"
   }
 }
