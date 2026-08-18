@@ -162,12 +162,81 @@ export function apply(ctx: Context) {
         }
       })
 
-      console.log('\x1b[36m[Host SessionManager]\x1b[0m Mounted HTTP APIs: /api/presets, /api/sessions, /api/sessions/create')
+      // 在指定会话中调用工具（验证隔离性）
+      const unInvoke = ctx.server.route('/api/sessions/invoke', async (req, res) => {
+        if (req.method === 'POST') {
+          let body = ''
+          req.on('data', (chunk) => (body += chunk))
+          req.on('end', async () => {
+            try {
+              const { sessionId, toolName, args } = JSON.parse(body || '{}')
+              const session = ctx.sessions.getSession(sessionId)
+              if (!session) {
+                res.writeHead(404, { 'Content-Type': 'application/json' })
+                return res.end(JSON.stringify({ success: false, error: `Session "${sessionId}" not found` }))
+              }
+
+              const sCtx = session.sessionCtx as any
+
+              if (toolName === 'greeter') {
+                if (!sCtx.greeter) {
+                  res.writeHead(200, { 'Content-Type': 'application/json' })
+                  return res.end(JSON.stringify({
+                    success: false,
+                    scopedOut: true,
+                    error: `❌ Tool "greeter" is NOT mounted in Preset "${session.presetName}" (Scope Isolated)`
+                  }))
+                }
+                const msg = sCtx.greeter.greet(args?.name || 'Agent User')
+                res.writeHead(200, { 'Content-Type': 'application/json' })
+                return res.end(JSON.stringify({ success: true, result: msg }))
+              }
+
+              if (toolName === 'counter') {
+                if (!sCtx.counter) {
+                  res.writeHead(200, { 'Content-Type': 'application/json' })
+                  return res.end(JSON.stringify({
+                    success: false,
+                    scopedOut: true,
+                    error: `❌ Tool "counter" is NOT mounted in Preset "${session.presetName}" (Scope Isolated)`
+                  }))
+                }
+                const count = sCtx.counter.increment(args?.delta || 1)
+                res.writeHead(200, { 'Content-Type': 'application/json' })
+                return res.end(JSON.stringify({ success: true, count }))
+              }
+
+              if (toolName === 'toolBash') {
+                if (!sCtx.toolBash) {
+                  res.writeHead(200, { 'Content-Type': 'application/json' })
+                  return res.end(JSON.stringify({
+                    success: false,
+                    scopedOut: true,
+                    error: `❌ Tool "toolBash" is NOT mounted in Preset "${session.presetName}"`
+                  }))
+                }
+                const result = await sCtx.toolBash.execute(args?.command || 'node -v')
+                res.writeHead(200, { 'Content-Type': 'application/json' })
+                return res.end(JSON.stringify({ success: true, result }))
+              }
+
+              res.writeHead(400, { 'Content-Type': 'application/json' })
+              res.end(JSON.stringify({ success: false, error: `Unknown tool "${toolName}"` }))
+            } catch (err: any) {
+              res.writeHead(500, { 'Content-Type': 'application/json' })
+              res.end(JSON.stringify({ success: false, error: err.message }))
+            }
+          })
+        }
+      })
+
+      console.log('\x1b[36m[Host SessionManager]\x1b[0m Mounted HTTP APIs: /api/presets, /api/sessions, /api/sessions/create, /api/sessions/invoke')
 
       return () => {
         unPresets()
         unList()
         unCreate()
+        unInvoke()
       }
     })
   })

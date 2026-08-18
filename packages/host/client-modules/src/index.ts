@@ -252,12 +252,162 @@ export class ClientModuleService extends Service {
       </div>
     </aside>
     <main>
+      <!-- Preset & Multi-Session Switcher -->
+      <div class="card" style="background: #1e293b; border: 1px solid #10b981; margin-bottom: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <div>
+            <h3 style="color: #34d399; font-size: 1.15rem; margin-bottom: 0.25rem;">🧩 Agent Preset & Session Scope Switcher (会话级预设)</h3>
+            <small style="color: var(--text-muted);">基于 Cordis <code>ctx.isolate()</code> 实现同进程内不同用户会话的人设与工具池隔离</small>
+          </div>
+          <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <select id="preset-select" style="background: #0f172a; border: 1px solid #334155; color: #f8fafc; padding: 0.45rem 0.8rem; border-radius: 0.375rem; font-size: 0.85rem;">
+              <option value="minimal">⚡ 极简模式 (Minimal: 仅 ToolBash)</option>
+              <option value="standard" selected>🌟 标准模式 (Standard: 全套工具)</option>
+            </select>
+            <button id="create-session-btn" style="background: #059669; font-size: 0.85rem; padding: 0.45rem 0.9rem;">
+              + 创建并切换会话
+            </button>
+          </div>
+        </div>
+
+        <div id="session-display" style="background: #0f172a; border: 1px solid #334155; border-radius: 0.5rem; padding: 1rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+            <div>
+              <span style="color: #94a3b8; font-size: 0.85rem;">当前活跃会话 ID:</span>
+              <code id="active-session-id" style="color: #38bdf8; font-weight: 600; margin-left: 0.4rem;">loading...</code>
+            </div>
+            <span id="active-preset-badge" class="badge" style="background: #065f46; color: #a7f3d0; border-color: #059669;">
+              Preset: standard
+            </span>
+          </div>
+
+          <div style="margin-bottom: 0.75rem;">
+            <div style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 0.25rem;">📝 注入该会话的专属 Persona Prompt:</div>
+            <div id="active-persona-text" style="font-size: 0.85rem; background: #1e293b; padding: 0.6rem; border-radius: 0.375rem; border-left: 3px solid #10b981; color: #f1f5f9;">
+              Loading persona...
+            </div>
+          </div>
+
+          <div style="margin-bottom: 1rem;">
+            <div style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 0.35rem;">🛠️ 该会话专属隔离挂载的工具服务池:</div>
+            <div id="active-tools-list" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+              <span class="badge">Loading tools...</span>
+            </div>
+          </div>
+
+          <div style="border-top: 1px dashed #334155; padding-top: 0.75rem;">
+            <div style="font-size: 0.8rem; color: #cbd5e1; margin-bottom: 0.5rem; font-weight: 600;">
+              🧪 隔离性实时验证（点击尝试在该会话内调用具体工具）：
+            </div>
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.75rem;">
+              <button onclick="window.__invokeTool('greeter')" style="background: #2563eb; font-size: 0.8rem; padding: 0.35rem 0.7rem;">
+                👉 调用 Greeter 工具
+              </button>
+              <button onclick="window.__invokeTool('counter')" style="background: #0d9488; font-size: 0.8rem; padding: 0.35rem 0.7rem;">
+                👉 调用 Counter 工具
+              </button>
+              <button onclick="window.__invokeTool('toolBash')" style="background: #7c3aed; font-size: 0.8rem; padding: 0.35rem 0.7rem;">
+                👉 调用 ToolBash 工具
+              </button>
+            </div>
+            <div id="tool-invoke-result" style="display: none; background: #1e293b; border-radius: 0.375rem; padding: 0.6rem; font-size: 0.85rem; border: 1px solid #334155;"></div>
+          </div>
+        </div>
+      </div>
+
       <div class="section-title">Main Content Slot (<code>main.cards</code>)</div>
       <div id="slot-main-cards" class="slot-container">
         <div style="color: var(--text-muted); font-size: 0.875rem;">Waiting for plugins to mount...</div>
       </div>
     </main>
   </div>
+
+  <script>
+    let currentSessionId = null;
+
+    async function initPresets() {
+      try {
+        const res = await fetch('/api/presets');
+        const presets = await res.json();
+        const select = document.getElementById('preset-select');
+        if (select && Array.isArray(presets) && presets.length > 0) {
+          select.innerHTML = presets.map(p => 
+            \`<option value="\${p.name}">\${p.name === 'minimal' ? '⚡ 极简模式 (Minimal: 仅 ToolBash)' : '🌟 标准模式 (Standard: 全套工具)'}</option>\`
+          ).join('');
+        }
+      } catch (e) {}
+
+      await switchSession('standard');
+
+      document.getElementById('create-session-btn')?.addEventListener('click', () => {
+        const select = document.getElementById('preset-select');
+        if (select) switchSession(select.value);
+      });
+    }
+
+    async function switchSession(preset) {
+      const sessionId = 'chat-' + preset + '-' + Math.random().toString(36).slice(2, 6);
+      try {
+        const res = await fetch('/api/sessions/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: sessionId, preset })
+        });
+        const data = await res.json();
+        currentSessionId = data.id;
+
+        document.getElementById('active-session-id').innerText = data.id;
+        document.getElementById('active-preset-badge').innerText = 'Preset: ' + data.presetName;
+        document.getElementById('active-preset-badge').style.background = data.presetName === 'minimal' ? '#78350f' : '#065f46';
+        document.getElementById('active-preset-badge').style.borderColor = data.presetName === 'minimal' ? '#d97706' : '#059669';
+        document.getElementById('active-preset-badge').style.color = data.presetName === 'minimal' ? '#fde68a' : '#a7f3d0';
+        
+        document.getElementById('active-persona-text').innerText = data.persona;
+
+        const toolsContainer = document.getElementById('active-tools-list');
+        toolsContainer.innerHTML = data.tools.map(t => {
+          const short = t.replace('@mini-dsh/plugin-', '').replace('@mini-dsh/', '');
+          return \`<span class="badge" style="background: #1e3a8a; border-color: #3b82f6; color: #93c5fd;">🛠️ \${short}</span>\`;
+        }).join('');
+
+        const resultEl = document.getElementById('tool-invoke-result');
+        if (resultEl) resultEl.style.display = 'none';
+      } catch (err) {
+        console.error('Failed to create session:', err);
+      }
+    }
+
+    window.__invokeTool = async function(toolName) {
+      if (!currentSessionId) return;
+      const resultEl = document.getElementById('tool-invoke-result');
+      resultEl.style.display = 'block';
+      resultEl.innerHTML = '<span style="color: #94a3b8;">Invoking tool in session scope...</span>';
+
+      try {
+        const res = await fetch('/api/sessions/invoke', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionId: currentSessionId, toolName, args: { name: 'Web Explorer', command: 'node -v' } })
+        });
+        const data = await res.json();
+        if (data.success) {
+          resultEl.innerHTML = \`
+            <div style="color: #4ade80; font-weight: 600;">✓ [Success] Tool "\${toolName}" executed in session:</div>
+            <pre style="margin-top: 0.35rem; color: #f8fafc; font-size: 0.8rem; background: #0f172a; padding: 0.5rem; border-radius: 0.25rem;">\${JSON.stringify(data.result || { count: data.count }, null, 2)}</pre>
+          \`;
+        } else {
+          resultEl.innerHTML = \`
+            <div style="color: #f87171; font-weight: 600;">🚫 [Rejected by Scope Isolation]:</div>
+            <div style="margin-top: 0.25rem; color: #fca5a5;">\${data.error}</div>
+          \`;
+        }
+      } catch (err) {
+        resultEl.innerHTML = \`<span style="color: #f87171;">Error: \${err.message}</span>\`;
+      }
+    };
+
+    window.addEventListener('DOMContentLoaded', initPresets);
+  </script>
 
   <!-- Boot Client Shell from /lib/client-shell.js -->
   <script type="module" src="/lib/client-shell.js"></script>
