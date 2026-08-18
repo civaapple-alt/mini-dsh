@@ -2,7 +2,11 @@
 
 本项目是一个极简版（Educational & Minimalist）的 DeepSeek Harness 架构实现，专门用于学习与验证 **Cordis** 框架的核心设计哲学：**“Everything is a plugin”（一切皆插件）**。
 
-> 📖 **推荐初学者必读**：请阅读 [**《Mini-DSH 架构学习指南：从 CLI 启动到浏览器端动态插件加载全流程》**](docs/beginner-guide.md)，包含全流程时序图、`window.__MINI_BOOT__` 详解、`client-shell.js` 运作机制与 DSH 源码对标！
+> 📖 **推荐必读学习指南**：
+> - 🚀 [**《从 CLI 启动到浏览器端动态插件加载全流程》**](docs/beginner-guide.md)：全流程时序图、`window.__MINI_BOOT__` 详解、`client-shell.js` 运作机制与 DSH 源码对标！
+> - 🛡️ [**《Capability Seam（能力接缝）与可移植执行世界深入指南》**](docs/capability-seams.md)：Service Definition / Provider / Consumer 三元角色模型与本地/云端沙箱无感切换！
+> - 🧩 [**《预设配置体系指南：部署级 Profile vs 会话级 Preset 与 Include & Patch》**](docs/presets-and-profiles.md)：Cordis 作用域隔离（`ctx.isolate`）、多租户会话与全局增量补丁机制！
+> - 📝 [**《架构决策记录 (Agent Notes / ADRs)》**](.agents/notes/README.zh.md)：包含所有核心架构决策的中英文演进记录。
 
 ---
 

@@ -31,3 +31,7 @@
 | `2026-08-18` | [声明式 UI 插槽系统 (Slot Registry)](implemented/architecture/2026-08-18-declarative-ui-slot-system.zh.md) | `ctx.slots` 抽象、组件解耦、多插件共享渲染区、事件驱动的响应式更新 |
 | `2026-08-18` | [配置驱动的 Profile 机制](implemented/architecture/2026-08-18-configuration-profiles-and-bundles.zh.md) | YAML 配置映射、Headless/Web 模式自由切换、零侵入插件开关 |
 | `2026-08-18` | [端到端启动与清单生命周期全解](implemented/architecture/2026-08-18-end-to-end-boot-and-manifest-lifecycle.zh.md) | CLI 引导、Host 注册、`window.__MINI_BOOT__` 注入与浏览器 Shell 动态加载全时序与排错 |
+| `2026-08-18` | [能力接缝与可移植执行世界](implemented/architecture/2026-08-18-capability-seams-and-portable-execution-worlds.zh.md) | Service Definition / Provider / Consumer 三元解耦与本地/沙箱执行世界一秒切换 |
+| `2026-08-18` | [会话级预设与作用域隔离](implemented/architecture/2026-08-18-per-session-presets-and-scope-isolation.zh.md) | 部署级 Profile 与会话级 Preset 双层体系，`ctx.isolate` 多租户隔离 |
+| `2026-08-18` | [Include 与 Patch 增量配置补丁机制](implemented/architecture/2026-08-18-include-and-patch-configuration-overlays.zh.md) | 递归 Include 解析与 `insert`/`delete`/`update` 补丁算法，零冗余继承全局配置 |
+

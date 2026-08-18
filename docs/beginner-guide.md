@@ -280,3 +280,14 @@ Mini-DSH 严格复刻了 DeepSeek Harness 官方的架构模式。下表为两�
 | **UI 插槽底座** | `packages/client/slots` | [`packages/client/ui-slots`](file:///d:/gh-ws/dsh-ws/deepseek-harness/packages/client/ui-slots/README.md) (`ctx.slots`) | 提供通用的 `register(slotName, Component)` 插槽解耦机制 |
 | **全栈插件结构** | `packages/plugins/*` (`src/index.ts` + `src/client.ts`) | `packages/*` (`packages/goal/goal-local` + `packages/client/ui-goal`) | 自包含前后端逻辑，通过 Profile 配置实现插拔 |
 | **Headless 任务运行器** | `packages/plugins/task-runner` | [`packages/core/agent-loop`](file:///d:/gh-ws/dsh-ws/deepseek-harness/packages/core/agent-loop/README.md) + [`packages/bundle/headless`](file:///d:/gh-ws/dsh-ws/deepseek-harness/packages/bundle/headless/README.md) | 多步骤工作流调度、服务依赖装配、事件发射与收尾 |
+| **能力接缝 (Capability Seam)** | `packages/seams/executor` + `providers/*` + `tool-bash` | [`packages/shell/shell`](file:///d:/gh-ws/dsh-ws/deepseek-harness/packages/shell/shell/README.md) + `bash-local` + `tool-bash` | 契约、提供方、消费者三元解耦，详见 [Capability Seams 指南](capability-seams.md) |
+| **会话级预设 (Presets)** | `presets/*.yml` + `@mini-dsh/host-session-manager` | [`apps/cli/config/agent-presets/`](file:///d:/gh-ws/dsh-ws/deepseek-harness/apps/cli/config/agent-presets) + `packages/preset/agent-presets` | 多租户会话隔离与动态人设/工具装配，详见 [Presets 与 Profiles 指南](presets-and-profiles.md) |
+| **增量补丁 (Include & Patch)** | `@mini-dsh/plugin-include` + `profiles/goal.yml` | [`vendor/include`](file:///d:/gh-ws/dsh-ws/deepseek-harness/vendor/include/README.md) + `goal.cordis.yml` | 声明式全局配置复用与补丁插入 |
+
+---
+
+## 8. 扩展技术指南
+
+- 📖 [Capability Seams（能力接缝）与可移植执行世界深入指南](capability-seams.md)
+- 📖 [预设配置体系指南：部署级 Profile vs 会话级 Preset 与 Include & Patch](presets-and-profiles.md)
+
