@@ -6,6 +6,7 @@
 > - 🚀 [**《从 CLI 启动到浏览器端动态插件加载全流程》**](docs/beginner-guide.md)：全流程时序图、`window.__MINI_BOOT__` 详解、`client-shell.js` 运作机制与 DSH 源码对标！
 > - 🛡️ [**《Capability Seam（能力接缝）与可移植执行世界深入指南》**](docs/capability-seams.md)：Service Definition / Provider / Consumer 三元角色模型与本地/云端沙箱无感切换！
 > - 🧩 [**《预设配置体系指南：部署级 Profile vs 会话级 Preset 与 Include & Patch》**](docs/presets-and-profiles.md)：Cordis 作用域隔离（`ctx.isolate`）、多租户会话与全局增量补丁机制！
+> - 🔥 [**《Schemastery 配置校验与 HMR 实时热重载指南》**](docs/schemastery-and-hmr.md)：声明式 Schema 校验与文件变更实时热重载！
 > - 📝 [**《架构决策记录 (Agent Notes / ADRs)》**](.agents/notes/README.zh.md)：包含所有核心架构决策的中英文演进记录。
 
 ---
@@ -46,18 +47,19 @@ mini-dsh/
 ├── package.json                   # 根目录配置与工作区脚本
 ├── pnpm-workspace.yaml            # pnpm monorepo 配置
 ├── tsconfig.base.json             # 基础 TypeScript 配置
-├── profiles/                      # 【部署级 Profile】：全局基础设施组装 (Web/Base/Local/Sandbox/Goal)
+├── profiles/                      # 【部署级 Profile】：全局基础设施组装 (Web/Base/Local/Sandbox/Goal/HMR)
 │   ├── base.yml                   # Headless 模式（仅基础后端插件与任务运行器）
 │   ├── web.yml                    # Web GUI 模式（包含 Web 服务与全栈 UI 插件）
 │   ├── local.yml                  # 本地执行世界 Profile（LocalExecutor + ToolBash）
 │   ├── sandbox.yml                # 安全沙箱执行世界 Profile（SandboxExecutor + ToolBash）
 │   ├── presets.yml                # 多会话隔离演示 Profile（SessionManager + PresetsDemo）
-│   └── goal.yml                   # 增量补丁 Profile（Include base.yml + Patch Insert Goal 领域）
+│   ├── goal.yml                   # 增量补丁 Profile（Include base.yml + Patch Insert Goal 领域）
+│   └── hmr.yml                    # 实时热重载与 Schemastery 校验 Profile
 ├── presets/                       # 【会话级 Preset】：用户在每个 Chat 独享的 Agent 预设
 │   ├── minimal.yml                # 极简模式：仅分配 ToolBash 与精简 Prompt
 │   └── standard.yml               # 标准模式：分配 Greeter + Counter + ToolBash 全套工具
 ├── apps/
-│   └── cli/                       # Host 启动入口 (支持 Include & Patch 动态递归解析)
+│   └── cli/                       # Host 启动入口 (支持 Include & Patch 动态递归解析与 Schemastery 校验)
 └── packages/
     ├── seams/                     # Capability Seams (抽象服务契约层)
     │   └── executor/              # Executor 契约包 (@mini-dsh/seam-executor)
@@ -67,18 +69,20 @@ mini-dsh/
     ├── host/
     │   ├── webserver/             # Host HTTP 服务插件 (ctx.server)
     │   ├── client-modules/        # Client 模块扫描与 Bundle 分发 (ctx.clientModules)
-    │   └── session-manager/       # 会话管理与 Preset 子上下文隔离 (ctx.sessions)
+    │   ├── session-manager/       # 会话管理与 Preset 子上下文隔离 (ctx.sessions)
+    │   └── hmr/                   # 热模块替换与配置监听插件 (@mini-dsh/host-hmr)
     ├── client/
     │   ├── slots/                 # 浏览器 UI 插槽系统 (ctx.slots)
     │   └── shell/                 # 浏览器 Cordis 引导内核 (AppWebEntry)
     └── plugins/
-        ├── greeter/               # 问候服务全栈插件 (后端 API + 前端卡片)
+        ├── greeter/               # 问候服务全栈插件 (导出 Schemastery Config Schema)
         ├── counter/               # 计数器全栈插件 (后端状态 + 前端组件)
         ├── tool-bash/             # 面向模型的 Bash 工具插件 (Consumer)
         ├── task-runner/           # Headless 任务运行器插件 (多步骤工作流编排与事件发射)
         ├── presets-demo/          # 多会话作用域隔离演示插件
         ├── goal/                  # 持久化目标状态机领域插件 (@mini-dsh/plugin-goal)
-        └── tool-goal/             # 面向模型的 Goal 工具插件 (@mini-dsh/plugin-tool-goal)
+        ├── tool-goal/             # 面向模型的 Goal 工具插件 (@mini-dsh/plugin-tool-goal)
+        └── hmr-demo/              # HMR 与 Schemastery 演示插件 (@mini-dsh/plugin-hmr-demo)
 ```
 
 ---
@@ -185,7 +189,30 @@ pnpm start:presets
 
 ---
 
-### 7. 验证 “Everything is a plugin” 的可插拔性
+### 7. 运行 Schemastery 声明式校验与 HMR 实时热重载实验
+
+验证在**无需重启 Node.js 进程**的前提下，外部修改配置文件如何被 `HmrService` 实时捕获并驱动插件内部状态瞬间热替换：
+
+```bash
+pnpm start:hmr
+```
+
+**控制台输出：**
+```text
+[Cordis Loader] Applying plugin: @mini-dsh/plugin-greeter
+[Schemastery] 🛡️ Validated config & injected defaults for "@mini-dsh/plugin-greeter"
+[Plugin Greeter] Initialized with prefix: "Initial Greeter" (Enthusiasm: !)
+...
+[Before HMR] Initial Greeter Output: "Initial Greeter, Bob!"
+[Simulated External Editor] 📝 Modifying "scratch-live-config.json" to v2...
+[Host HMR] 🔥 Detected change in "scratch-live-config.json"! Triggering live reload...
+[After HMR] Hot-Reloaded Greeter Output: "🔥 Hot-Reloaded Super Greeter (v2), Bob!!!!"
+✔ [HMR Demo] Live Hot-Reload test completed successfully!
+```
+
+---
+
+### 8. 验证 “Everything is a plugin” 的可插拔性
 
 #### 实验 A：在配置文件中禁用一个插件
 打开 `profiles/web.yml`，在 `plugin-counter` 节点下增加 `disabled: true`：

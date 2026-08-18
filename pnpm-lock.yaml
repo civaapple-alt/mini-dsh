@@ -7,6 +7,13 @@ settings:
 importers:
 
   .:
+    dependencies:
+      chokidar:
+        specifier: ^5.0.0
+        version: 5.0.0
+      schemastery:
+        specifier: ^3.18.0
+        version: 3.18.0
     devDependencies:
       '@types/js-yaml':
         specifier: ^4.0.9
@@ -35,6 +42,9 @@ importers:
       '@mini-dsh/host-client-modules':
         specifier: workspace:*
         version: link:../../packages/host/client-modules
+      '@mini-dsh/host-hmr':
+        specifier: workspace:*
+        version: link:../../packages/host/hmr
       '@mini-dsh/host-session-manager':
         specifier: workspace:*
         version: link:../../packages/host/session-manager
@@ -50,6 +60,9 @@ importers:
       '@mini-dsh/plugin-greeter':
         specifier: workspace:*
         version: link:../../packages/plugins/greeter
+      '@mini-dsh/plugin-hmr-demo':
+        specifier: workspace:*
+        version: link:../../packages/plugins/hmr-demo
       '@mini-dsh/plugin-presets-demo':
         specifier: workspace:*
         version: link:../../packages/plugins/presets-demo
@@ -101,6 +114,18 @@ importers:
       '@mini-dsh/host-webserver':
         specifier: workspace:*
         version: link:../webserver
+
+  packages/host/hmr:
+    dependencies:
+      '@deepseek-ai/cordis':
+        specifier: ^4.0.1
+        version: 4.0.1
+      chokidar:
+        specifier: ^5.0.0
+        version: 5.0.0
+      schemastery:
+        specifier: ^3.18.0
+        version: 3.18.0
 
   packages/host/session-manager:
     dependencies:
@@ -160,6 +185,9 @@ importers:
       '@deepseek-ai/cordis':
         specifier: ^4.0.1
         version: 4.0.1
+      schemastery:
+        specifier: ^3.18.0
+        version: 3.18.0
     devDependencies:
       '@mini-dsh/client-slots':
         specifier: workspace:*
@@ -170,6 +198,21 @@ importers:
       '@mini-dsh/host-webserver':
         specifier: workspace:*
         version: link:../../host/webserver
+
+  packages/plugins/hmr-demo:
+    dependencies:
+      '@deepseek-ai/cordis':
+        specifier: ^4.0.1
+        version: 4.0.1
+      '@mini-dsh/host-hmr':
+        specifier: workspace:*
+        version: link:../../host/hmr
+      '@mini-dsh/plugin-greeter':
+        specifier: workspace:*
+        version: link:../greeter
+      schemastery:
+        specifier: ^3.18.0
+        version: 3.18.0
 
   packages/plugins/presets-demo:
     dependencies:
@@ -589,6 +632,13 @@ packages:
   argparse@2.0.1:
     resolution: {integrity: sha512-8+9WqebbFzpX9OR+Wa6O29asIogeRMzcGtAINdpMHHyAg10f05aSFVBbcEqGf/PXw1EjAZ+q2/bEBg3DvurK3Q==}
 
+  chokidar@5.0.0:
+    resolution: {integrity: sha512-TQMmc3w+5AxjpL8iIiwebF73dRDF4fBIieAqGn9RGCWaEVwQ6Fb2cGe31Yns0RRIzii5goJ1Y7xbMwo1TxMplw==}
+    engines: {node: '>= 20.19.0'}
+
+  cosmokit@1.8.1:
+    resolution: {integrity: sha512-PDBv4l90xZKrUsZ0vtoycgZpO/j4iFsqJXrAxsyBDsnQRI7ZMJXIjgDJsKNjd5L8jnVnnlrDCdhkFbTncgCVjQ==}
+
   esbuild@0.25.12:
     resolution: {integrity: sha512-bbPBYYrtZbkt6Os6FiTLCTFxvq4tt3JKall1vRwshA3fdVztsLAatFaZobhkBC8/BrPetoa0oksYoKXoG4ryJg==}
     engines: {node: '>=18'}
@@ -607,6 +657,13 @@ packages:
   js-yaml@4.3.1:
     resolution: {integrity: sha512-CY6crGq313MX8GkwvB7tzgp99vjQxY1++5y10/BKN/GUfHqWaOGQMNZkBvqSzsZKWk/ijwHlWzzkLulsGHhjWQ==}
     hasBin: true
+
+  readdirp@5.1.1:
+    resolution: {integrity: sha512-Kko+Y5XQ6fM+Ce3dq3m9YGxnacYZYl9cA1wZjaF3Vbry2L3i1qVg8+CAgNPsXRArPMUMCaOR7oa9Nqntc43JKA==}
+    engines: {node: '>= 20.19.0'}
+
+  schemastery@3.18.0:
+    resolution: {integrity: sha512-Jw2uxjoyyqc/yeurmChUEc/jbi8GsrdXV/KmqRUDZXJAXAmrJiPsz8vKa17l/VckyzljHZ9oGaul443CQiXxtA==}
 
   tsx@4.23.12:
     resolution: {integrity: sha512-FDf4L4sYzKtzWYhU/Xm0AQFdTjdIxNo9ElTf2mxXM6k8YMHXzYUe4yODVaXP4V9uMFbVg8c0qyBccK2OOxb45Q==}
@@ -796,6 +853,12 @@ snapshots:
 
   argparse@2.0.1: {}
 
+  chokidar@5.0.0:
+    dependencies:
+      readdirp: 5.1.1
+
+  cosmokit@1.8.1: {}
+
   esbuild@0.25.12:
     optionalDependencies:
       '@esbuild/aix-ppc64': 0.25.12
@@ -860,6 +923,13 @@ snapshots:
   js-yaml@4.3.1:
     dependencies:
       argparse: 2.0.1
+
+  readdirp@5.1.1: {}
+
+  schemastery@3.18.0:
+    dependencies:
+      '@standard-schema/spec': 1.1.0
+      cosmokit: 1.8.1
 
   tsx@4.23.12:
     dependencies:

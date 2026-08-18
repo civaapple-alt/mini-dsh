@@ -290,4 +290,6 @@ Mini-DSH 严格复刻了 DeepSeek Harness 官方的架构模式。下表为两�
 
 - 📖 [Capability Seams（能力接缝）与可移植执行世界深入指南](capability-seams.md)
 - 📖 [预设配置体系指南：部署级 Profile vs 会话级 Preset 与 Include & Patch](presets-and-profiles.md)
+- 📖 [Schemastery 配置校验与 HMR 实时热重载指南](schemastery-and-hmr.md)
+
 

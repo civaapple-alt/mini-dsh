@@ -1,11 +1,18 @@
 import { Context, Service } from '@deepseek-ai/cordis'
 import type {} from '@mini-dsh/host-webserver'
 import type {} from '@mini-dsh/host-client-modules'
+import Schema from 'schemastery'
 import path from 'node:path'
 
 export interface GreeterConfig {
   greetingPrefix?: string
+  enthusiasmLevel?: number
 }
+
+export const Config: Schema<GreeterConfig> = Schema.object({
+  greetingPrefix: Schema.string().default('Hello from Cordis Greeter').description('问候语前缀'),
+  enthusiasmLevel: Schema.number().default(1).description('问候热情度级别 (1-5)'),
+})
 
 declare module '@deepseek-ai/cordis' {
   interface Context {
@@ -15,15 +22,18 @@ declare module '@deepseek-ai/cordis' {
 
 export class GreeterService extends Service {
   public prefix: string
+  public enthusiasm: number
 
   constructor(ctx: Context, config: GreeterConfig = {}) {
     super(ctx, 'greeter')
     this.prefix = config.greetingPrefix ?? 'Hello from Cordis Greeter'
-    console.log(`\x1b[34m[Plugin Greeter]\x1b[0m Initialized with prefix: "${this.prefix}"`)
+    this.enthusiasm = config.enthusiasmLevel ?? 1
+    console.log(`\x1b[34m[Plugin Greeter]\x1b[0m Initialized with prefix: "${this.prefix}" (Enthusiasm: ${'!'.repeat(this.enthusiasm)})`)
   }
 
   public greet(name: string): string {
-    return `${this.prefix}, ${name}!`
+    const marks = '!'.repeat(this.enthusiasm)
+    return `${this.prefix}, ${name}${marks}`
   }
 }
 

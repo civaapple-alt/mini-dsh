@@ -1,0 +1,16 @@
+{
+  "name": "@mini-dsh/plugin-hmr-demo",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@deepseek-ai/cordis": "^4.0.1",
+    "@mini-dsh/host-hmr": "workspace:*",
+    "@mini-dsh/plugin-greeter": "workspace:*",
+    "schemastery": "^3.18.0"
+  }
+}

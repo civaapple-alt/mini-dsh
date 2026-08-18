@@ -130,6 +130,18 @@ async function main() {
     console.log(`\x1b[33m[Cordis Loader]\x1b[0m Applying plugin: ${entry.name}`)
     try {
       const pluginMod = await resolvePlugin(entry.name)
+
+      // 🌟 Schemastery 声明式校验与默认值自动注入
+      if (typeof pluginMod.Config === 'function') {
+        try {
+          config = pluginMod.Config(config)
+          console.log(`\x1b[32m[Schemastery]\x1b[0m 🛡️ Validated config & injected defaults for "${entry.name}"`)
+        } catch (err: any) {
+          console.error(`\x1b[31m[Schemastery Error]\x1b[0m Configuration invalid for "${entry.name}":`, err.message)
+          throw err
+        }
+      }
+
       await ctx.plugin(pluginMod, config)
     } catch (err: any) {
       console.error(`\x1b[31m[Cordis Loader] Error applying ${entry.name}:\x1b[0m`, err)

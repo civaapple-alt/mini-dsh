@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.6.0] - 2026-08-18
+
+### Added (Schemastery 声明式配置校验与 HMR 实时热重载)
+- **Schemastery 声明式 Schema 校验与元数据**：
+  - 在 `@mini-dsh/plugin-greeter`、`@mini-dsh/host-hmr`、`@mini-dsh/plugin-hmr-demo` 中通过 `Schema.object` 导出强类型配置 Schema。
+  - 在 `apps/cli/src/index.ts`（Loader）中集成自动类型校验与默认值自动注入机制。
+- **`@mini-dsh/host-hmr` (HMR 服务插件)**：
+  - 基于 `chokidar` 实现配置与模块变动监听服务，注册 `ctx.hmr`。
+  - 配合 Cordis `ctx.effect()` 实现零进程重启、零内存泄漏的实时热替换（Quiescent Teardown）。
+- **`@mini-dsh/plugin-hmr-demo` 与 `profiles/hmr.yml`**：
+  - 提供 `pnpm start:hmr` 一键测试，验证 Schemastery 默认值注入与文件变更时内存状态的实时热替换。
+- **文档新增**：
+  - 新增 [`docs/schemastery-and-hmr.md`](docs/schemastery-and-hmr.md) 专题指南，对标 `vendor/schemastery` 与 `vendor/hmr`。
+
+---
+
 ## [0.5.0] - 2026-08-18
 
 ### Added (Include & Patch 增量补丁机制与 Goal 目标领域)

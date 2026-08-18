@@ -23,6 +23,8 @@
     "@mini-dsh/host-session-manager": "workspace:*",
     "@mini-dsh/plugin-presets-demo": "workspace:*",
     "@mini-dsh/plugin-goal": "workspace:*",
-    "@mini-dsh/plugin-tool-goal": "workspace:*"
+    "@mini-dsh/plugin-tool-goal": "workspace:*",
+    "@mini-dsh/host-hmr": "workspace:*",
+    "@mini-dsh/plugin-hmr-demo": "workspace:*"
   }
 }

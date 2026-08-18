@@ -11,7 +11,8 @@
     "build": "esbuild src/client.ts --bundle --format=esm --outfile=lib/client.js --platform=browser"
   },
   "dependencies": {
-    "@deepseek-ai/cordis": "^4.0.1"
+    "@deepseek-ai/cordis": "^4.0.1",
+    "schemastery": "^3.18.0"
   },
   "devDependencies": {
     "@mini-dsh/client-slots": "workspace:*",

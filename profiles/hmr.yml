@@ -1,0 +1,17 @@
+# ==========================================================
+# Mini-DSH Profile: hmr (Schemastery & HMR Demo)
+# ==========================================================
+# Demonstrates:
+# 1. Schemastery validating plugin config & injecting default values
+# 2. Host HMR watching file changes & hot-updating running services
+
+- name: '@mini-dsh/plugin-greeter'
+  config:
+    greetingPrefix: "Initial Greeter"
+    enthusiasmLevel: 1
+
+- name: '@mini-dsh/host-hmr'
+
+- name: '@mini-dsh/plugin-hmr-demo'
+  config:
+    sampleName: "Bob"

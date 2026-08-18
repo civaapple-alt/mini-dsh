@@ -14,14 +14,19 @@
     "start:sandbox": "tsx apps/cli/src/index.ts --profile sandbox",
     "start:presets": "tsx apps/cli/src/index.ts --profile presets",
     "start:goal": "tsx apps/cli/src/index.ts --profile goal",
+    "start:hmr": "tsx apps/cli/src/index.ts --profile hmr",
     "dev": "pnpm run build && pnpm start"
   },
   "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
     "@types/node": "^22.13.0",
-    "typescript": "^5.7.3",
-    "tsx": "^4.19.3",
     "esbuild": "^0.25.0",
     "js-yaml": "^4.1.0",
-    "@types/js-yaml": "^4.0.9"
+    "tsx": "^4.19.3",
+    "typescript": "^5.7.3"
+  },
+  "dependencies": {
+    "chokidar": "^5.0.0",
+    "schemastery": "^3.18.0"
   }
 }
