@@ -5,10 +5,17 @@ export function apply(ctx: Context) {
   // Inject the slots service and register a component in the 'main.cards' slot
   ctx.inject(['slots'], (ctx) => {
     ctx.effect(() => {
+      const mountedAt = new Date().toLocaleTimeString()
+
       const unregister = ctx.slots.register('main.cards', (container) => {
         container.innerHTML = `
-          <div class="card">
-            <h3>👋 Greeter Plugin (Full-Stack)</h3>
+          <div class="card" style="border: 1px solid #3b82f6; animation: flash-card 0.6s ease-out;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+              <h3 style="margin-bottom: 0; color: #38bdf8;">👋 Greeter Plugin (Full-Stack)</h3>
+              <span class="badge" style="background: #1e3a8a; color: #93c5fd; border: 1px solid #3b82f6; font-size: 0.75rem;">
+                ⚡ Bundle Mounted: ${mountedAt}
+              </span>
+            </div>
             <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">
               This UI component was loaded dynamically via the <code>main.cards</code> Slot.
               It calls the backend service <code>GET /api/greet</code> hosted on Node.js Cordis Context.

@@ -15,6 +15,7 @@
     "start:presets": "tsx apps/cli/src/index.ts --profile presets",
     "start:goal": "tsx apps/cli/src/index.ts --profile goal",
     "start:hmr": "tsx apps/cli/src/index.ts --profile hmr",
+    "watch:greeter": "pnpm --filter @mini-dsh/plugin-greeter dev",
     "dev": "pnpm run build && pnpm start"
   },
   "devDependencies": {

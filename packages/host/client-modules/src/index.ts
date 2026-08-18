@@ -207,6 +207,10 @@ export class ClientModuleService extends Service {
       border-radius: 0.375rem;
       margin-right: 0.5rem;
     }
+    @keyframes flash-card {
+      0% { transform: scale(0.98); box-shadow: 0 0 20px rgba(59, 130, 246, 0.8); }
+      100% { transform: scale(1); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+    }
   </style>
   <script>
     window.__MINI_BOOT__ = ${bootGraphJson};

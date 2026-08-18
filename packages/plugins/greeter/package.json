@@ -8,7 +8,8 @@
     "client": "./lib/client.js"
   },
   "scripts": {
-    "build": "esbuild src/client.ts --bundle --format=esm --outfile=lib/client.js --platform=browser"
+    "build": "esbuild src/client.ts --bundle --format=esm --outfile=lib/client.js --platform=browser",
+    "dev": "esbuild src/client.ts --bundle --format=esm --outfile=lib/client.js --platform=browser --watch"
   },
   "dependencies": {
     "@deepseek-ai/cordis": "^4.0.1",
