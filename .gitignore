@@ -1,0 +1,8 @@
+.env
+node_modules/
+lib
+dist
+*.tsbuildinfo
+pnpm-debug.log
+.pnpm-store/
+.cache/

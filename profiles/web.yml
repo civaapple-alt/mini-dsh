@@ -1,0 +1,21 @@
+# ==========================================================
+# Mini-DSH Profile: web (Full-Stack Web GUI)
+# ==========================================================
+# This profile activates the web server, client module scanner,
+# and all full-stack plugins (with both backend & frontend UI slots).
+
+- name: '@mini-dsh/host-webserver'
+  config:
+    port: 3000
+
+- name: '@mini-dsh/host-client-modules'
+  config: {}
+
+- name: '@mini-dsh/plugin-greeter'
+  config:
+    greetingPrefix: "Cordis Mini-DSH Web"
+
+- name: '@mini-dsh/plugin-counter'
+  config:
+    initialCount: 0
+

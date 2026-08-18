@@ -1,0 +1,19 @@
+{
+  "name": "@mini-dsh/cli",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./src/index.ts",
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@deepseek-ai/cordis": "^4.0.1",
+    "js-yaml": "^4.1.0",
+    "@types/js-yaml": "^4.0.9",
+    "@mini-dsh/host-webserver": "workspace:*",
+    "@mini-dsh/host-client-modules": "workspace:*",
+    "@mini-dsh/plugin-greeter": "workspace:*",
+    "@mini-dsh/plugin-counter": "workspace:*"
+  }
+}

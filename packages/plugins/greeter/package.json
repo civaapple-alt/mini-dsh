@@ -1,0 +1,21 @@
+{
+  "name": "@mini-dsh/plugin-greeter",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "mini": {
+    "client": "./lib/client.js"
+  },
+  "scripts": {
+    "build": "esbuild src/client.ts --bundle --format=esm --outfile=lib/client.js --platform=browser"
+  },
+  "dependencies": {
+    "@deepseek-ai/cordis": "^4.0.1"
+  },
+  "devDependencies": {
+    "@mini-dsh/client-slots": "workspace:*",
+    "@mini-dsh/host-webserver": "workspace:*",
+    "@mini-dsh/host-client-modules": "workspace:*"
+  }
+}

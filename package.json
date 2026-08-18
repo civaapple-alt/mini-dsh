@@ -1,0 +1,21 @@
+{
+  "name": "mini-dsh-root",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.7.0",
+  "scripts": {
+    "build": "pnpm -r --filter=\"./packages/**\" run build",
+    "start": "tsx apps/cli/src/index.ts --profile web",
+    "start:base": "tsx apps/cli/src/index.ts --profile base",
+    "dev": "pnpm run build && pnpm start"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.0",
+    "typescript": "^5.7.3",
+    "tsx": "^4.19.3",
+    "esbuild": "^0.25.0",
+    "js-yaml": "^4.1.0",
+    "@types/js-yaml": "^4.0.9"
+  }
+}

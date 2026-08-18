@@ -1,0 +1,13 @@
+# ==========================================================
+# Mini-DSH Profile: base (Headless Minimal)
+# ==========================================================
+# This profile only activates backend service plugins.
+# No web server, no GUI.
+
+- name: '@mini-dsh/plugin-greeter'
+  config:
+    greetingPrefix: "Hello from Headless Base Profile"
+
+- name: '@mini-dsh/plugin-counter'
+  config:
+    initialCount: 100

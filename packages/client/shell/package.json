@@ -1,0 +1,14 @@
+{
+  "name": "@mini-dsh/client-shell",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "build": "esbuild src/index.ts --bundle --format=esm --outfile=lib/index.js --platform=browser"
+  },
+  "dependencies": {
+    "@deepseek-ai/cordis": "^4.0.1",
+    "@mini-dsh/client-slots": "workspace:*"
+  }
+}
