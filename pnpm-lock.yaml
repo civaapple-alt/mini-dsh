@@ -44,6 +44,9 @@ importers:
       '@mini-dsh/plugin-counter':
         specifier: workspace:*
         version: link:../../packages/plugins/counter
+      '@mini-dsh/plugin-goal':
+        specifier: workspace:*
+        version: link:../../packages/plugins/goal
       '@mini-dsh/plugin-greeter':
         specifier: workspace:*
         version: link:../../packages/plugins/greeter
@@ -56,6 +59,9 @@ importers:
       '@mini-dsh/plugin-tool-bash':
         specifier: workspace:*
         version: link:../../packages/plugins/tool-bash
+      '@mini-dsh/plugin-tool-goal':
+        specifier: workspace:*
+        version: link:../../packages/plugins/tool-goal
       '@mini-dsh/provider-executor-local':
         specifier: workspace:*
         version: link:../../packages/providers/executor-local
@@ -143,6 +149,12 @@ importers:
         specifier: workspace:*
         version: link:../../host/webserver
 
+  packages/plugins/goal:
+    dependencies:
+      '@deepseek-ai/cordis':
+        specifier: ^4.0.1
+        version: 4.0.1
+
   packages/plugins/greeter:
     dependencies:
       '@deepseek-ai/cordis':
@@ -202,6 +214,15 @@ importers:
       '@mini-dsh/seam-executor':
         specifier: workspace:*
         version: link:../../seams/executor
+
+  packages/plugins/tool-goal:
+    dependencies:
+      '@deepseek-ai/cordis':
+        specifier: ^4.0.1
+        version: 4.0.1
+      '@mini-dsh/plugin-goal':
+        specifier: workspace:*
+        version: link:../goal
 
   packages/providers/executor-local:
     dependencies:

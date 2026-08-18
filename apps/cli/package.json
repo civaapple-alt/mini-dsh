@@ -21,6 +21,8 @@
     "@mini-dsh/provider-executor-sandbox": "workspace:*",
     "@mini-dsh/plugin-tool-bash": "workspace:*",
     "@mini-dsh/host-session-manager": "workspace:*",
-    "@mini-dsh/plugin-presets-demo": "workspace:*"
+    "@mini-dsh/plugin-presets-demo": "workspace:*",
+    "@mini-dsh/plugin-goal": "workspace:*",
+    "@mini-dsh/plugin-tool-goal": "workspace:*"
   }
 }

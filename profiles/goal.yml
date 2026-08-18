@@ -1,0 +1,16 @@
+# ==========================================================
+# Mini-DSH Profile: goal (Include & Patch Overlay)
+# ==========================================================
+# 严格对标 DeepSeek Harness 的 examples/headless-agent/goal.cordis.yml：
+# 引入基础 headless base.yml 进程底座，通过 patches.insert 增量挂载 Goal 领域及其工具。
+
+- id: base
+  name: '@mini-dsh/plugin-include'
+  config:
+    path: ./base.yml
+    patches:
+      - insert:
+          - id: goal
+            name: '@mini-dsh/plugin-goal'
+          - id: tool-goal
+            name: '@mini-dsh/plugin-tool-goal'

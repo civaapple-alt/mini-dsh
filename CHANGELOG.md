@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.5.0] - 2026-08-18
+
+### Added (Include & Patch 增量补丁机制与 Goal 目标领域)
+- **CLI 递归 Include & Patch 引擎**：
+  - 更新 `apps/cli/src/index.ts`，支持基于 `@mini-dsh/plugin-include` 解析 `config.path` 与 `config.patches`（支持 `insert`、`delete`、`update`）。
+  - 完全复刻 DeepSeek Harness 的 `Include & Patch` 拓扑组装算法。
+- **`@mini-dsh/plugin-goal` (Goal Domain)**：
+  - 提供 `ctx.goals` 状态机服务，管理 `active` $\to$ `paused` $\to$ `blocked` $\to$ `completed` 目标状态与 Round 轮次。
+- **`@mini-dsh/plugin-tool-goal` (Consumer)**：
+  - 注册面向模型的 `completeGoal` / `getGoalStatus` 工具。
+- **`profiles/goal.yml` 增量覆写 Profile**：
+  - 基于 `base.yml` 通过 `patches.insert` 动态注入 Goal 状态机与工具。
+  - 根目录新增 `pnpm start:goal` 脚本。
+
+---
+
 ## [0.4.0] - 2026-08-18
 
 ### Added (会话级 Presets 与多租户作用域隔离)

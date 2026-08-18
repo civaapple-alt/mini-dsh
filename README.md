@@ -42,17 +42,18 @@ mini-dsh/
 ├── package.json                   # 根目录配置与工作区脚本
 ├── pnpm-workspace.yaml            # pnpm monorepo 配置
 ├── tsconfig.base.json             # 基础 TypeScript 配置
-├── profiles/                      # 【部署级 Profile】：全局基础设施组装 (Web/Base/Local/Sandbox)
+├── profiles/                      # 【部署级 Profile】：全局基础设施组装 (Web/Base/Local/Sandbox/Goal)
 │   ├── base.yml                   # Headless 模式（仅基础后端插件与任务运行器）
 │   ├── web.yml                    # Web GUI 模式（包含 Web 服务与全栈 UI 插件）
 │   ├── local.yml                  # 本地执行世界 Profile（LocalExecutor + ToolBash）
 │   ├── sandbox.yml                # 安全沙箱执行世界 Profile（SandboxExecutor + ToolBash）
-│   └── presets.yml                # 多会话隔离演示 Profile（SessionManager + PresetsDemo）
+│   ├── presets.yml                # 多会话隔离演示 Profile（SessionManager + PresetsDemo）
+│   └── goal.yml                   # 增量补丁 Profile（Include base.yml + Patch Insert Goal 领域）
 ├── presets/                       # 【会话级 Preset】：用户在每个 Chat 独享的 Agent 预设
 │   ├── minimal.yml                # 极简模式：仅分配 ToolBash 与精简 Prompt
 │   └── standard.yml               # 标准模式：分配 Greeter + Counter + ToolBash 全套工具
 ├── apps/
-│   └── cli/                       # Host 启动入口 (支持 --profile 和 --task 参数)
+│   └── cli/                       # Host 启动入口 (支持 Include & Patch 动态递归解析)
 └── packages/
     ├── seams/                     # Capability Seams (抽象服务契约层)
     │   └── executor/              # Executor 契约包 (@mini-dsh/seam-executor)
@@ -71,7 +72,9 @@ mini-dsh/
         ├── counter/               # 计数器全栈插件 (后端状态 + 前端组件)
         ├── tool-bash/             # 面向模型的 Bash 工具插件 (Consumer)
         ├── task-runner/           # Headless 任务运行器插件 (多步骤工作流编排与事件发射)
-        └── presets-demo/          # 多会话作用域隔离演示插件
+        ├── presets-demo/          # 多会话作用域隔离演示插件
+        ├── goal/                  # 持久化目标状态机领域插件 (@mini-dsh/plugin-goal)
+        └── tool-goal/             # 面向模型的 Goal 工具插件 (@mini-dsh/plugin-tool-goal)
 ```
 
 ---
@@ -117,7 +120,35 @@ pnpm start:task "Nightly Security Audit and Build"
 
 ---
 
-### 4. 运行 Capability Seam 执行世界切换（本地 vs 云端沙箱）
+### 4. 运行 Include & Patch 全局增量补丁（Goal 领域模式）
+
+完全对标 DeepSeek Harness 的 `examples/headless-agent/goal.cordis.yml`，在无需复制粘贴 100+ 行配置的情况下，通过 `Include + patches.insert` 动态叠加 Goal 状态机：
+
+```bash
+pnpm start:goal
+```
+
+**控制台输出：**
+```text
+[Include & Patch] 📦 Including base profile: "./base.yml"
+[Include & Patch] ➕ [Insert Patch] Injected 2 plugin(s): @mini-dsh/plugin-goal, @mini-dsh/plugin-tool-goal
+[Goal Domain] 🎯 Initialized. Persisted goal state machine active.
+[Consumer ToolGoal] 🛠️  Model-facing Goal tool registered (bound to `ctx.goals`).
+=======================================================
+▶ [TaskRunner] Starting Task: "Deploy Mini-DSH Headless Task"
+=======================================================
+[Goal Domain] 🎯 Created Goal: "Deploy Mini-DSH Headless Task" (Status: active, Round: 1)
+[Step 1/4] Context init: "Hello from Headless Base Profile, Agent Engineer!"
+[Goal Domain] 🔄 Goal "Deploy Mini-DSH Headless Task" advanced to Round 2
+[Step 2/4] Iteration #1 metric = 110
+[Goal Domain] 🔄 Goal "Deploy Mini-DSH Headless Task" advanced to Round 3
+[Step 3/4] Iteration #2 metric = 120
+[Goal Domain] 🎯 Goal "Deploy Mini-DSH Headless Task" status updated to: completed
+```
+
+---
+
+### 5. 运行 Capability Seam 执行世界切换（本地 vs 云端沙箱）
 
 仅通过切换 Profile 配置，即可实现上层工具无感跨环境迁移：
 
@@ -136,7 +167,7 @@ pnpm start:sandbox
 
 ---
 
-### 5. 运行多会话隔离实验（Per-Session Presets 极简 vs 标准模式）
+### 6. 运行多会话隔离实验（Per-Session Presets 极简 vs 标准模式）
 
 验证在**同一个 Node.js 进程**中，两个不同 Preset 的会话如何通过 Cordis 子上下文（`isolate`）实现能力隔离：
 
@@ -150,7 +181,7 @@ pnpm start:presets
 
 ---
 
-### 6. 验证 “Everything is a plugin” 的可插拔性
+### 7. 验证 “Everything is a plugin” 的可插拔性
 
 #### 实验 A：在配置文件中禁用一个插件
 打开 `profiles/web.yml`，在 `plugin-counter` 节点下增加 `disabled: true`：

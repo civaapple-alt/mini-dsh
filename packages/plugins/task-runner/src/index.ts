@@ -75,8 +75,12 @@ export class TaskRunnerService extends Service {
     console.log(`\x1b[1m\x1b[32m▶ [TaskRunner] Starting Task: "${taskName}"\x1b[0m`)
     console.log('='.repeat(55))
 
-    // 1. 触发 task/start 事件
+    // 1. 触发 task/start 事件并初始化 Goal 领域（若存在）
     this.ctx.emit('task/start', taskName)
+    const goals = (this.ctx.root as any).goals
+    if (goals) {
+      goals.createGoal(taskName, taskName)
+    }
 
     let currentStepIndex = 1
 
@@ -108,6 +112,9 @@ export class TaskRunnerService extends Service {
         description: `Exec: ${shellCommand} [${execRes.environment}]`,
         timestamp: Date.now(),
       })
+      if (goals) {
+        goals.nextRound(taskName)
+      }
       await new Promise(r => setTimeout(r, 150))
       currentStepIndex++
     }
@@ -126,11 +133,17 @@ export class TaskRunnerService extends Service {
         description: `Iteration #${i} (Metric=${currentCount})`,
         timestamp: Date.now(),
       })
+      if (goals && i < iterations) {
+        goals.nextRound(taskName)
+      }
       await new Promise(r => setTimeout(r, 150))
       currentStepIndex++
     }
 
     // 5. 任务完成汇总
+    if (goals) {
+      goals.updateStatus(taskName, 'completed')
+    }
     const durationMs = Date.now() - startTime
     const finalCount = counter ? counter.get() : iterations * 10
     const summary: TaskCompleteEvent = {

@@ -3,10 +3,68 @@ import fs from 'node:fs'
 import path from 'node:path'
 import yaml from 'js-yaml'
 
+interface Patch {
+  insert?: ProfileEntry[]
+  delete?: string[]
+  update?: Array<{ name: string; config?: any; disabled?: boolean }>
+}
+
 interface ProfileEntry {
+  id?: string
   name: string
   config?: any
   disabled?: boolean
+}
+
+function expandProfileEntries(filePath: string): ProfileEntry[] {
+  if (!fs.existsSync(filePath)) {
+    throw new Error(`Profile file not found: ${filePath}`)
+  }
+  const content = fs.readFileSync(filePath, 'utf8')
+  const rawEntries = yaml.load(content) as ProfileEntry[]
+  if (!Array.isArray(rawEntries)) {
+    throw new Error(`Invalid profile structure in ${filePath}. Expected a list of entries.`)
+  }
+
+  const result: ProfileEntry[] = []
+
+  for (const entry of rawEntries) {
+    const isInclude = entry.name === '@mini-dsh/plugin-include' || entry.name === '@deepseek-ai/cordis-plugin-include'
+    if (isInclude && entry.config?.path) {
+      const targetPath = path.resolve(path.dirname(filePath), entry.config.path)
+      console.log(`\x1b[35m[Include & Patch]\x1b[0m 📦 Including base profile: "${entry.config.path}"`)
+      let baseEntries = expandProfileEntries(targetPath)
+
+      // Apply patches if any
+      const patches: Patch[] = entry.config.patches || []
+      for (const patch of patches) {
+        if (patch.insert) {
+          console.log(`\x1b[35m[Include & Patch]\x1b[0m ➕ [Insert Patch] Injected ${patch.insert.length} plugin(s): ${patch.insert.map(e => e.name).join(', ')}`)
+          baseEntries.push(...patch.insert)
+        }
+        if (patch.delete) {
+          console.log(`\x1b[35m[Include & Patch]\x1b[0m ➖ [Delete Patch] Removed plugin(s): ${patch.delete.join(', ')}`)
+          baseEntries = baseEntries.filter(e => !patch.delete!.includes(e.name) && (!e.id || !patch.delete!.includes(e.id)))
+        }
+        if (patch.update) {
+          for (const upd of patch.update) {
+            console.log(`\x1b[35m[Include & Patch]\x1b[0m 🔄 [Update Patch] Updated config for: ${upd.name}`)
+            baseEntries = baseEntries.map(e => {
+              if (e.name === upd.name || (e.id && e.id === upd.name)) {
+                return { ...e, ...upd }
+              }
+              return e
+            })
+          }
+        }
+      }
+      result.push(...baseEntries)
+    } else {
+      result.push(entry)
+    }
+  }
+
+  return result
 }
 
 function parseArgs() {
@@ -52,13 +110,7 @@ async function main() {
     process.exit(1)
   }
 
-  const profileContent = fs.readFileSync(profilePath, 'utf8')
-  const entries = yaml.load(profileContent) as ProfileEntry[]
-
-  if (!Array.isArray(entries)) {
-    console.error(`\x1b[31m[Error] Invalid profile structure in ${profilePath}. Expected a list of entries.\x1b[0m`)
-    process.exit(1)
-  }
+  const entries = expandProfileEntries(profilePath)
 
   // 1. Initialize root Cordis Context
   const ctx = new Context()
