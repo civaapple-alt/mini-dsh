@@ -1,6 +1,6 @@
 # AGENTS.md — Mini-DSH Guidelines & Repository Standards
 
-Mini-DSH is a minimalist, educational harness demonstrating the **"Everything is a plugin"** architecture powered by **Cordis** (`@deepseek-ai/cordis`). It showcases full-stack modularity, symmetrical host/client execution, and configuration-driven profiles.
+Mini-DSH is an educational, minimalist reference implementation of the DeepSeek Harness (DSH) architecture powered by **Cordis** (`@deepseek-ai/cordis`). It showcases **"Everything is a plugin"**, fullstack dual-end execution (Node.js Host + Browser Web GUI), Capability Seams, per-session Presets with scope isolation, Include & Patch configuration overlays, and live HMR.
 
 ---
 
@@ -8,20 +8,18 @@ Mini-DSH is a minimalist, educational harness demonstrating the **"Everything is
 
 ```text
 apps/
-  cli/             Host Node.js CLI runner (drives Cordis Loader with YAML profiles)
+  cli/             Host CLI entry runner (drives Cordis Loader, Include & Patch, Schemastery)
+presets/           【Session-level Presets】Per-chat persona and restricted tool catalogs (minimal, standard)
+profiles/          【Deployment-level Profiles】Process infrastructure composition (web, base, local, sandbox, goal, hmr)
 packages/
-  host/
-    webserver/     HTTP server & router service (ctx.server)
-    client-modules/ Scans plugins for mini.client and serves window.__MINI_BOOT__ & bundles
-  client/
-    slots/         UI slot registry service (ctx.slots)
-    shell/         Browser Cordis boot kernel (loads modules & orchestrates slots)
-  plugins/
-    greeter/       Fullstack demo plugin (ctx.greeter + GET /api/greet + main.cards card)
-    counter/       Fullstack demo plugin (ctx.counter + /api/count + sidebar.widgets widget)
-profiles/          Cordis YAML profile definitions (base.yml, web.yml)
+  seams/           【Capability Seams】Abstract service definitions (@mini-dsh/seam-executor)
+  providers/       【Service Providers】Execution environments (executor-local, executor-sandbox)
+  host/            【Host Services】Infrastructure plugins (webserver, client-modules, session-manager, hmr)
+  client/          【Client Micro-Kernel】Browser Web GUI engine (slots, shell)
+  plugins/         【Feature Plugins】Fullstack & consumer plugins (greeter, counter, tool-bash, goal, tool-goal, task-runner, hmr-demo, presets-demo)
+docs/              【Tier 2 Concept & Lifecycle Guides】Specialized architecture tutorials and reference guides
 .agents/
-  notes/           Architecture Decision Records & notes (implemented/, proposed/, etc.)
+  notes/           【Tier 3 ADRs】Architectural decision records (implemented/architecture/)
 ```
 
 ---
@@ -30,68 +28,82 @@ profiles/          Cordis YAML profile definitions (base.yml, web.yml)
 
 ```sh
 pnpm install            # Install workspace dependencies (pnpm 11+ monorepo)
-pnpm run build          # Build all TypeScript files and client browser bundles (esbuild)
+pnpm run build          # Build all TypeScript modules and browser bundles (esbuild + tsc)
 pnpm start              # Start Web GUI profile on http://localhost:3000
-pnpm run start:base     # Start Headless base profile (backend services only)
-pnpm run dev            # Build and start Web GUI profile in one command
+pnpm run start:base     # Start Headless base task runner profile
+pnpm run start:task "T" # Start Headless task runner with custom task string
+pnpm run start:local    # Run Local execution world (LocalExecutor + ToolBash)
+pnpm run start:sandbox  # Run Secure Cloud Sandbox execution world (SandboxExecutor + ToolBash)
+pnpm run start:presets  # Run Multi-session scope isolation experiment (minimal vs standard)
+pnpm run start:goal     # Run Include & Patch overlay profile (base.yml + Goal domain)
+pnpm run start:hmr      # Run Schemastery validation & live HMR hot-reload simulation
+pnpm run watch:greeter  # Watch & live-recompile Greeter client bundle for instant Web HMR
 ```
 
 ---
 
-## 3. Core Architectural Conventions
+## 3. Progressive Documentation Hierarchy (One Home Per Fact)
 
-1. **Everything is a Plugin**:
-   - Every system capability and business feature is packaged as a Cordis plugin exposing `apply(ctx: Context, config?: Config)`.
+Documentation in Mini-DSH follows strict **Progressive Disclosure (渐进式披露)**:
+
+| Tier | Home | Scope & Purpose |
+|---|---|---|
+| **Tier 1 (Root)** | [`README.md`](README.md) & [`AGENTS.md`](AGENTS.md) | High-level architectural map, operational commands, and standing development rules. |
+| **Tier 2 (Guides)** | [`docs/beginner-guide.md`](docs/beginner-guide.md) | End-to-end tutorial: CLI boot $\to$ HTML injection $\to$ browser shell $\to$ slot rendering. |
+| **Tier 2 (Seams)** | [`docs/capability-seams.md`](docs/capability-seams.md) | Triad Seam model (Service Definition / Provider / Consumer) & portable execution worlds. |
+| **Tier 2 (Presets)**| [`docs/presets-and-profiles.md`](docs/presets-and-profiles.md) | Deployment Profile vs Session Preset hierarchy & `ctx.isolate()` multi-tenant isolation. |
+| **Tier 2 (HMR)** | [`docs/schemastery-and-hmr.md`](docs/schemastery-and-hmr.md) | Declarative Schema validation (`schemastery`) & dual-end SSE live hot-reloading. |
+| **Tier 3 (ADRs)** | [`.agents/notes/`](.agents/notes/README.zh.md) | Durable architectural decision records, trade-offs, and invariants. |
+| **Tier 3 (Packages)**| `packages/*/*/README.md` | Concrete per-package contract, exports, and dependencies. |
+
+---
+
+## 4. Core Architectural Invariants
+
+1. **Everything is a Plugin (`apply(ctx, config)`)**:
+   - Every service, tool, router, and UI widget is packaged as a Cordis plugin.
    - Long-lived capabilities inherit `Service` from `@deepseek-ai/cordis` and register with `super(ctx, 'serviceName')`.
-   - Extend `Context` and `Events` via TypeScript Declaration Merging for end-to-end type safety.
+   - Extend `Context` and `Events` via TypeScript Declaration Merging.
 
 2. **Registrations are Effects (`ctx.effect`)**:
-   - All external bindings (HTTP routes, event listeners, DOM elements) MUST be wrapped in `ctx.effect()`.
-   - `ctx.effect()` must return a disposer function. When a plugin unloads or `ctx.fiber.dispose()` is called, all resources are cleanly freed.
+   - All external bindings (HTTP routes, event listeners, file watchers, DOM slots) MUST be wrapped in `ctx.effect()`.
+   - `ctx.effect()` must return a disposer. When a plugin is disposed (`fiber.dispose()`), all resources are cleanly unloaded (Quiescent Teardown).
 
-3. **Explicit Dependency Injection (`ctx.inject`)**:
-   - Never import runtime singleton instances across packages.
-   - Accessing another service requires `ctx.inject(['serviceName'], (ctx) => { ... })`.
-   - Accessing `ctx.service` without declaring it in `inject` will trigger a runtime check failure (`cannot get property without inject`).
+3. **Capability Seam Triad (Definition $\to$ Provider $\to$ Consumer)**:
+   - Upper tools (`tool-bash`) MUST only depend on abstract seams (`ctx.executor`), never directly on concrete providers (`executor-local`).
+   - Swapping execution environments requires only changing the Provider in the Profile YAML.
 
-4. **Symmetrical Dual-End Cordis Architecture**:
-   - **Host (Node.js)**: Runs Cordis Context inside `apps/cli`.
-   - **Client (Browser)**: Runs an independent Cordis Context inside `packages/client/shell`.
-   - **Bridge**: `packages/host/client-modules` scans `package.json` with `mini.client`, generates `window.__MINI_BOOT__`, and serves bundles at `/plugins/:id/client.js`.
+4. **Two-Level Configuration & Multi-Session Scope Isolation**:
+   - **Deployment Profiles (`profiles/*.yml`)**: Process lifecycle, mounts global singletons (`ctx.server`, `ctx.clientModules`, `ctx.sessions`).
+   - **Session Presets (`presets/*.yml`)**: Chat lifecycle, loads dynamic persona & restricted tools.
+   - `SessionManagerService` uses `this.ctx.isolate('counter').isolate('greeter').isolate('toolBash')` to branch private child contexts for each chat session.
+   - To query services dynamically on anonymous session child contexts, use `sessionCtx.get('serviceName')` (bypasses static inject check).
 
-5. **UI Slot Registry Discipline (`ctx.slots`)**:
-   - Client plugins register UI components into named slots (e.g. `main.cards`, `sidebar.widgets`) via `ctx.slots.register(slotName, renderer)`.
-   - The shell layout only defines slot containers; it has zero direct knowledge of individual feature plugins.
-   - `register()` returns an unmount disposer to ensure clean unmounting.
+5. **Declarative Schema Validation (`schemastery`)**:
+   - Plugins export `export const Config: Schema<T> = Schema.object({ ... })`.
+   - Cordis Loader validates raw YAML configs and automatically injects default values on startup.
 
-6. **Configuration-Driven Profiles (`profiles/*.yml`)**:
-   - Runtime capabilities are determined entirely by the active YAML profile (`--profile <name>`).
-   - Disabling a plugin (`disabled: true`) cleanly suppresses both its backend routes and frontend UI without modifying code.
-
----
-
-## 4. Creating a New Plugin Checklist
-
-When adding a new plugin to `packages/plugins/<name>`:
-
-1. **Package Setup**:
-   - Create `package.json` with `@mini-dsh/plugin-<name>`.
-   - If providing frontend UI, add `"mini": { "client": "./dist/client.js" }` and an `esbuild` build script.
-2. **Host Backend (`src/index.ts`)**:
-   - Export `apply(ctx, config)`.
-   - If providing a service, extend `Service` and declare on `Context`.
-   - If exposing HTTP endpoints, use `ctx.inject(['server', ...], ...)`.
-3. **Client Frontend (`src/client.ts`)**:
-   - Export `apply(ctx)`.
-   - Use `ctx.inject(['slots'], (ctx) => { ctx.slots.register('slot.name', ...) })`.
-4. **Profile Declaration**:
-   - Add the plugin entry to `profiles/web.yml` or `profiles/base.yml`.
-5. **Build & Run**:
-   - Run `pnpm run build` and launch `pnpm start` to test.
+6. **Fullstack Dual-End HMR (SSE + Dynamic Fiber Reload)**:
+   - Host `HmrService` watches `packages/plugins/*/lib/client.js` and broadcasts reload events over `/api/hmr/events` SSE stream.
+   - Browser `client-shell` unloads old plugin fiber (`oldFiber.dispose()`), re-imports bundle with cache busting, and re-applies `ctx.plugin(newMod)` with zero page refresh.
 
 ---
 
-## 5. Agent Notes Policy
+## 5. Development & Contribution Checklist
 
-- Significant architectural decisions, structural changes, or invariant guarantees MUST be documented in `.agents/notes/implemented/architecture/YYYY-MM-DD-title.md` (and `.zh.md`).
-- Active notes must follow the standard triplet structure: Context & Problem, Architectural Decisions, and Consequences & Guarantees.
+When adding or modifying a capability:
+
+1. **Create Package / Seam**:
+   - Place in appropriate subfolder (`packages/seams`, `packages/providers`, `packages/host`, `packages/plugins`).
+   - If providing frontend UI, declare `"mini": { "client": "./lib/client.js" }` and add an `esbuild` script.
+2. **Implement Service & Schema**:
+   - Extend `Service` and export `export const Config = Schema.object({ ... })`.
+   - Wrap disposables in `ctx.effect()`.
+3. **Register in Profile or Preset**:
+   - Add to `profiles/*.yml` or `presets/*.yml`.
+4. **Document via Progressive Disclosure**:
+   - If introducing a major architectural pattern, record an Agent Note in `.agents/notes/implemented/architecture/`.
+   - If altering user/developer workflows, update the owning `docs/*.md` guide.
+   - Update `CHANGELOG.md` following Keep a Changelog standard.
+5. **Verify**:
+   - Run `pnpm run build && pnpm start` to verify.
