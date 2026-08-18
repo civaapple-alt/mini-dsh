@@ -1,5 +1,5 @@
 {
-  "name": "@mini-dsh/plugin-task-runner",
+  "name": "@mini-dsh/provider-executor-local",
   "version": "0.1.0",
   "type": "module",
   "main": "./src/index.ts",
@@ -8,11 +8,7 @@
     "build": "tsc"
   },
   "dependencies": {
-    "@deepseek-ai/cordis": "^4.0.1"
-  },
-  "devDependencies": {
-    "@mini-dsh/plugin-greeter": "workspace:*",
-    "@mini-dsh/plugin-counter": "workspace:*",
+    "@deepseek-ai/cordis": "^4.0.1",
     "@mini-dsh/seam-executor": "workspace:*"
   }
 }

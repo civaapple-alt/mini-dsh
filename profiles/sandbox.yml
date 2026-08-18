@@ -1,0 +1,29 @@
+# ==========================================================
+# Mini-DSH Profile: sandbox (Remote Sandbox Execution World)
+# ==========================================================
+# This profile binds the RemoteSandboxExecutor provider.
+# All commands are safely routed to an isolated cloud VM.
+
+- name: '@mini-dsh/provider-executor-sandbox'
+  config:
+    sandboxId: "e2b-secure-container-prod"
+    sandboxRegion: "ap-east-hongkong"
+
+- name: '@mini-dsh/plugin-tool-bash'
+
+- name: '@mini-dsh/plugin-greeter'
+  config:
+    greetingPrefix: "Hello from Cloud Sandbox World"
+
+- name: '@mini-dsh/plugin-counter'
+  config:
+    initialCount: 200
+
+- name: '@mini-dsh/plugin-task-runner'
+  config:
+    taskName: "Untrusted Code Execution in Sandbox"
+    targetUser: "Cloud Agent"
+    shellCommand: "rm -rf /untrusted/workspace && python3 script.py"
+    iterations: 2
+    autoRun: true
+    exitOnComplete: false

@@ -47,6 +47,18 @@ importers:
       '@mini-dsh/plugin-task-runner':
         specifier: workspace:*
         version: link:../../packages/plugins/task-runner
+      '@mini-dsh/plugin-tool-bash':
+        specifier: workspace:*
+        version: link:../../packages/plugins/tool-bash
+      '@mini-dsh/provider-executor-local':
+        specifier: workspace:*
+        version: link:../../packages/providers/executor-local
+      '@mini-dsh/provider-executor-sandbox':
+        specifier: workspace:*
+        version: link:../../packages/providers/executor-sandbox
+      '@mini-dsh/seam-executor':
+        specifier: workspace:*
+        version: link:../../packages/seams/executor
       '@types/js-yaml':
         specifier: ^4.0.9
         version: 4.0.9
@@ -128,6 +140,42 @@ importers:
       '@mini-dsh/plugin-greeter':
         specifier: workspace:*
         version: link:../greeter
+      '@mini-dsh/seam-executor':
+        specifier: workspace:*
+        version: link:../../seams/executor
+
+  packages/plugins/tool-bash:
+    dependencies:
+      '@deepseek-ai/cordis':
+        specifier: ^4.0.1
+        version: 4.0.1
+      '@mini-dsh/seam-executor':
+        specifier: workspace:*
+        version: link:../../seams/executor
+
+  packages/providers/executor-local:
+    dependencies:
+      '@deepseek-ai/cordis':
+        specifier: ^4.0.1
+        version: 4.0.1
+      '@mini-dsh/seam-executor':
+        specifier: workspace:*
+        version: link:../../seams/executor
+
+  packages/providers/executor-sandbox:
+    dependencies:
+      '@deepseek-ai/cordis':
+        specifier: ^4.0.1
+        version: 4.0.1
+      '@mini-dsh/seam-executor':
+        specifier: workspace:*
+        version: link:../../seams/executor
+
+  packages/seams/executor:
+    dependencies:
+      '@deepseek-ai/cordis':
+        specifier: ^4.0.1
+        version: 4.0.1
 
 packages:
 

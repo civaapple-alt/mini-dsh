@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.3.0] - 2026-08-18
+
+### Added (Capability Seam 与可移植执行世界)
+- **`@mini-dsh/seam-executor` (Service Definition)**：
+  - 声明 `ctx.executor` 抽象服务契约与 `ExecutorService` 基类及 `ExecResult` 接口规范。
+- **`@mini-dsh/provider-executor-local` (Local Provider)**：
+  - 基于 Node.js 子进程实现本地环境命令执行。
+- **`@mini-dsh/provider-executor-sandbox` (Sandbox Provider)**：
+  - 模拟云端容器与虚拟沙箱（E2B / Docker / Landlock）的安全隔离命令执行。
+- **`@mini-dsh/plugin-tool-bash` (Consumer)**：
+  - 面向大模型与业务层的 Bash 执行工具插件，与底层提供方完全解耦。
+- **新增 Profiles 与脚本**：
+  - 新增 `profiles/local.yml`（本地执行世界）与 `profiles/sandbox.yml`（安全沙箱世界）。
+  - 根目录新增 `pnpm start:local` 与 `pnpm start:sandbox`。
+- **`@mini-dsh/plugin-task-runner` 增强**：
+  - 支持感知并调用 `ctx.executor` 执行工作流中的 Shell 指令并展示跨环境执行差异。
+
+---
+
 ## [0.2.0] - 2026-08-18
 
 ### Added (新增功能)

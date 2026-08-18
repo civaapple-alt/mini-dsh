@@ -43,11 +43,18 @@ mini-dsh/
 ├── pnpm-workspace.yaml            # pnpm monorepo 配置
 ├── tsconfig.base.json             # 基础 TypeScript 配置
 ├── profiles/                      # Cordis Profile 配置文件
-│   ├── base.yml                   # Headless 模式（仅后端插件与任务运行器，无 Web 服务）
-│   └── web.yml                    # Web GUI 模式（包含 Web 服务与全栈 UI 插件）
+│   ├── base.yml                   # Headless 模式（仅基础后端插件与任务运行器）
+│   ├── web.yml                    # Web GUI 模式（包含 Web 服务与全栈 UI 插件）
+│   ├── local.yml                  # 本地执行世界 Profile（LocalExecutor + ToolBash）
+│   └── sandbox.yml                # 安全沙箱执行世界 Profile（SandboxExecutor + ToolBash）
 ├── apps/
 │   └── cli/                       # Host 启动入口 (支持 --profile 和 --task 参数)
 └── packages/
+    ├── seams/                     # Capability Seams (抽象服务契约层)
+    │   └── executor/              # Executor 契约包 (@mini-dsh/seam-executor)
+    ├── providers/                 # Service Providers (具体能力提供方)
+    │   ├── executor-local/        # 本地进程执行提供方 (@mini-dsh/provider-executor-local)
+    │   └── executor-sandbox/      # 远程安全沙箱提供方 (@mini-dsh/provider-executor-sandbox)
     ├── host/
     │   ├── webserver/             # Host HTTP 服务插件 (ctx.server)
     │   └── client-modules/        # Client 模块扫描与 Bundle 分发 (ctx.clientModules)
@@ -57,6 +64,7 @@ mini-dsh/
     └── plugins/
         ├── greeter/               # 问候服务全栈插件 (后端 API + 前端卡片)
         ├── counter/               # 计数器全栈插件 (后端状态 + 前端组件)
+        ├── tool-bash/             # 面向模型的 Bash 工具插件 (Consumer)
         └── task-runner/           # Headless 任务运行器插件 (多步骤工作流编排与事件发射)
 ```
 
@@ -100,15 +108,28 @@ pnpm start:base
 pnpm start:task "Nightly Security Audit and Build"
 ```
 
-**控制台输出过程**：
-1. Cordis 自动加载 `greeter`、`counter` 与 `task-runner`；
-2. `task-runner` 响应式注入所需服务，执行多步骤工作流（Step 1: 上下文初始化 $\to$ Step 2~N: 状态推进）；
-3. 过程广播 `task/start`、`task/step`、`task/complete` 类型化事件；
-4. 打印任务耗时与状态 Summary 并排空事件循环退出。
+---
+
+### 4. 运行 Capability Seam 执行世界切换（本地 vs 云端沙箱）
+
+仅通过切换 Profile 配置，即可实现上层工具无感跨环境迁移：
+
+#### 场景 A：在宿主机本地执行（Local Profile）
+```bash
+pnpm start:local
+```
+- 控制台输出：`[Local Host Process] 🖥️  Executing: "node -v"`，直接在本地环境中快速执行指令。
+
+#### 场景 B：在云端安全沙箱中执行（Sandbox Profile）
+```bash
+pnpm start:sandbox
+```
+- 控制台输出：`[Cloud Sandbox VM: e2b-secure-container-prod] 🔒 Safely isolating`；
+- **上层 `tool-bash` 与 `task-runner` 业务代码 0 修改**，命令已自动路由并安全隔离在沙箱容器中执行！
 
 ---
 
-### 4. 验证 “Everything is a plugin” 的可插拔性
+### 5. 验证 “Everything is a plugin” 的可插拔性
 
 #### 实验 A：在配置文件中禁用一个插件
 打开 `profiles/web.yml`，在 `plugin-counter` 节点下增加 `disabled: true`：

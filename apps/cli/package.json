@@ -15,6 +15,10 @@
     "@mini-dsh/host-client-modules": "workspace:*",
     "@mini-dsh/plugin-greeter": "workspace:*",
     "@mini-dsh/plugin-counter": "workspace:*",
-    "@mini-dsh/plugin-task-runner": "workspace:*"
+    "@mini-dsh/plugin-task-runner": "workspace:*",
+    "@mini-dsh/seam-executor": "workspace:*",
+    "@mini-dsh/provider-executor-local": "workspace:*",
+    "@mini-dsh/provider-executor-sandbox": "workspace:*",
+    "@mini-dsh/plugin-tool-bash": "workspace:*"
   }
 }

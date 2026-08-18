@@ -10,6 +10,8 @@
     "start": "tsx apps/cli/src/index.ts --profile web",
     "start:base": "tsx apps/cli/src/index.ts --profile base",
     "start:task": "tsx apps/cli/src/index.ts --profile base --task",
+    "start:local": "tsx apps/cli/src/index.ts --profile local",
+    "start:sandbox": "tsx apps/cli/src/index.ts --profile sandbox",
     "dev": "pnpm run build && pnpm start"
   },
   "devDependencies": {

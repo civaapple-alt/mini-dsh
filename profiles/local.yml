@@ -1,0 +1,28 @@
+# ==========================================================
+# Mini-DSH Profile: local (Local Execution World)
+# ==========================================================
+# This profile binds the LocalExecutor provider.
+# All commands run directly on the host machine.
+
+- name: '@mini-dsh/provider-executor-local'
+  config:
+    cwd: '.'
+
+- name: '@mini-dsh/plugin-tool-bash'
+
+- name: '@mini-dsh/plugin-greeter'
+  config:
+    greetingPrefix: "Hello from Local Host World"
+
+- name: '@mini-dsh/plugin-counter'
+  config:
+    initialCount: 50
+
+- name: '@mini-dsh/plugin-task-runner'
+  config:
+    taskName: "Local System Build & Check"
+    targetUser: "Local Developer"
+    shellCommand: "node -v"
+    iterations: 2
+    autoRun: true
+    exitOnComplete: false

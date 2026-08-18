@@ -1,6 +1,7 @@
 import { Context, Service } from '@deepseek-ai/cordis'
 import type {} from '@mini-dsh/plugin-greeter'
 import type {} from '@mini-dsh/plugin-counter'
+import type {} from '@mini-dsh/seam-executor'
 
 export interface TaskRunnerConfig {
   /** 任务名称 */
@@ -13,6 +14,8 @@ export interface TaskRunnerConfig {
   autoRun?: boolean
   /** 执行完成后是否自动退出进程（常用于 CI/Headless 批量任务） */
   exitOnComplete?: boolean
+  /** 可选执行的 Shell 指令（测试 Capability Seam 执行器） */
+  shellCommand?: string
 }
 
 export interface TaskStepEvent {
@@ -41,8 +44,6 @@ declare module '@deepseek-ai/cordis' {
 }
 
 export class TaskRunnerService extends Service {
-  static inject = ['greeter', 'counter']
-
   private config: TaskRunnerConfig
 
   constructor(ctx: Context, config: TaskRunnerConfig = {}) {
@@ -53,6 +54,7 @@ export class TaskRunnerService extends Service {
       iterations: config.iterations ?? 3,
       autoRun: config.autoRun ?? true,
       exitOnComplete: config.exitOnComplete ?? false,
+      shellCommand: config.shellCommand ?? 'node -v',
     }
     console.log(`\x1b[32m[Plugin TaskRunner]\x1b[0m Initialized. Configured task: "${this.config.taskName}"`)
   }
@@ -64,59 +66,84 @@ export class TaskRunnerService extends Service {
     const taskName = customName || this.config.taskName!
     const targetUser = options?.targetUser || this.config.targetUser!
     const iterations = options?.iterations ?? this.config.iterations!
+    const shellCommand = options?.shellCommand ?? this.config.shellCommand!
+    const hasExecutor = !!this.ctx.root.executor
+    const totalSteps = iterations + (hasExecutor ? 2 : 1)
     const startTime = Date.now()
 
-    console.log('\n' + '='.repeat(50))
+    console.log('\n' + '='.repeat(55))
     console.log(`\x1b[1m\x1b[32m▶ [TaskRunner] Starting Task: "${taskName}"\x1b[0m`)
-    console.log('='.repeat(50))
+    console.log('='.repeat(55))
 
     // 1. 触发 task/start 事件
     this.ctx.emit('task/start', taskName)
 
-    // 2. 步骤 1: 调用 greeter 服务进行初始化
-    const step1Msg = this.ctx.greeter 
-      ? this.ctx.greeter.greet(targetUser) 
-      : `[Fallback] Hello, ${targetUser} (Greeter service not found)`
+    let currentStepIndex = 1
+
+    // 2. 步骤 1: 调用 greeter 服务进行初始化（若可用）
+    const greeter = this.ctx.root.greeter
+    const step1Msg = greeter 
+      ? greeter.greet(targetUser) 
+      : `[Fallback] Hello, ${targetUser} (Greeter service not mounted)`
     
-    console.log(`\x1b[36m[Step 1/${iterations + 1}]\x1b[0m Initializing context: "${step1Msg}"`)
+    console.log(`\x1b[36m[Step ${currentStepIndex}/${totalSteps}]\x1b[0m Context init: "${step1Msg}"`)
     this.ctx.emit('task/step', {
-      step: 1,
-      total: iterations + 1,
+      step: currentStepIndex,
+      total: totalSteps,
       description: `Init context: ${step1Msg}`,
       timestamp: Date.now(),
     })
-    await new Promise(r => setTimeout(r, 200))
+    await new Promise(r => setTimeout(r, 150))
+    currentStepIndex++
 
-    // 3. 循环步骤: 调用 counter 服务递增计数与记录状态
+    // 3. 可选步骤: 如果当前环境中挂载了 executor 契约，执行 Shell 任务
+    const executor = this.ctx.root.executor
+    if (executor) {
+      console.log(`\x1b[36m[Step ${currentStepIndex}/${totalSteps}]\x1b[0m 🚀 Executing shell via \`ctx.executor\` seam...`)
+      const execRes = await executor.exec(shellCommand)
+      console.log(`\x1b[32m[Step ${currentStepIndex}/${totalSteps} Output]\x1b[0m (Env: \x1b[1m${execRes.environment}\x1b[0m in ${execRes.durationMs}ms):\n  👉 ${execRes.stdout || execRes.stderr}`)
+      this.ctx.emit('task/step', {
+        step: currentStepIndex,
+        total: totalSteps,
+        description: `Exec: ${shellCommand} [${execRes.environment}]`,
+        timestamp: Date.now(),
+      })
+      await new Promise(r => setTimeout(r, 150))
+      currentStepIndex++
+    }
+
+    // 4. 循环步骤: 调用 counter 服务递增计数与记录状态
+    const counter = this.ctx.root.counter
     for (let i = 1; i <= iterations; i++) {
-      const currentCount = this.ctx.counter 
-        ? this.ctx.counter.increment(10) 
+      const currentCount = counter 
+        ? counter.increment(10) 
         : i * 10
       
-      console.log(`\x1b[36m[Step ${i + 1}/${iterations + 1}]\x1b[0m Iteration #${i} executed. Current Counter Metric = \x1b[1m${currentCount}\x1b[0m`)
+      console.log(`\x1b[36m[Step ${currentStepIndex}/${totalSteps}]\x1b[0m Iteration #${i} metric = \x1b[1m${currentCount}\x1b[0m`)
       this.ctx.emit('task/step', {
-        step: i + 1,
-        total: iterations + 1,
+        step: currentStepIndex,
+        total: totalSteps,
         description: `Iteration #${i} (Metric=${currentCount})`,
         timestamp: Date.now(),
       })
-      await new Promise(r => setTimeout(r, 200))
+      await new Promise(r => setTimeout(r, 150))
+      currentStepIndex++
     }
 
-    // 4. 任务完成汇总
+    // 5. 任务完成汇总
     const durationMs = Date.now() - startTime
-    const finalCount = this.ctx.counter ? this.ctx.counter.get() : iterations * 10
+    const finalCount = counter ? counter.get() : iterations * 10
     const summary: TaskCompleteEvent = {
       taskName,
       durationMs,
-      stepsCompleted: iterations + 1,
+      stepsCompleted: totalSteps,
       finalCount,
     }
 
-    console.log('='.repeat(50))
+    console.log('='.repeat(55))
     console.log(`\x1b[1m\x1b[32m✔ [TaskRunner] Task Completed in ${durationMs}ms!\x1b[0m`)
     console.log(`📊 Summary: Total Steps = ${summary.stepsCompleted}, Final Counter = ${summary.finalCount}`)
-    console.log('='.repeat(50) + '\n')
+    console.log('='.repeat(55) + '\n')
 
     this.ctx.emit('task/complete', summary)
     return summary
