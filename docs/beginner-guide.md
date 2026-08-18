@@ -2,6 +2,8 @@
 
 本文档专为初学者编写，详细拆解 **Mini-DSH** 从命令行输入 `pnpm start` 开始，到浏览器渲染出各个插件 UI 的**完整端到端生命周期**。通过本文档，你可以彻底搞懂 Cordis 插件机制、Host 与 Client 双端通信、启动清单（`window.__MINI_BOOT__`）、UI 插槽系统以及**插件的停用与重启加载**运作原理。
 
+![Mini-DSH Web Shell](../home.jpg)
+
 ---
 
 ## 目录

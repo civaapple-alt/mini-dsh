@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.7.0] - 2026-08-18
+
+### Added (Web 端双端联动 HMR 与 Web GUI 会话预设切换器)
+- **Web 端全栈双端联动 HMR**：
+  - `packages/host/hmr` 扩展支持 `/api/hmr/events` SSE 广播流，自动监听 `packages/plugins/*/lib/client.js` 产物变动并推送重载事件；提供 `POST /api/hmr/trigger` 手动触发接口。
+  - `packages/client/shell` 建立 EventSource 连接，收到事件后自底向上执行 `oldFiber.dispose()` 卸载旧组件，带时间戳动态 `import()` 重新装配新组件，零页面刷新并弹出 Toast 动画。
+  - 根目录增加 `pnpm watch:greeter` 前端实时监听构建脚本。
+- **Web GUI 会话预设交互面板与作用域隔离验证（Preset Scope Switcher）**：
+  - Web 界面主区域顶部新增 `Agent Preset & Session Scope Switcher` 交互面板，支持一键切换 `minimal` 与 `standard` 预设模式。
+  - 动态展示当前会话的 Persona Prompt 与隔离挂载的工具服务池（Scoped Tool Registry）。
+  - 提供实时工具调用验证接口 `POST /api/sessions/invoke` 与多工具测试按钮。
+  - 修复动态匿名 Session 子上下文下的服务检索：使用 Cordis 官方反射 API `sCtx.get('serviceName')` 替代直接属性访问，规避注入守卫拦截。
+- **文档与视觉更新**：
+  - 更新 `home.jpg` 运行全景图并在 `README.md` 与 `docs/beginner-guide.md` 中嵌入展示。
+
+---
+
 ## [0.6.0] - 2026-08-18
 
 ### Added (Schemastery 声明式配置校验与 HMR 实时热重载)
