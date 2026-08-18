@@ -35,6 +35,9 @@ importers:
       '@mini-dsh/host-client-modules':
         specifier: workspace:*
         version: link:../../packages/host/client-modules
+      '@mini-dsh/host-session-manager':
+        specifier: workspace:*
+        version: link:../../packages/host/session-manager
       '@mini-dsh/host-webserver':
         specifier: workspace:*
         version: link:../../packages/host/webserver
@@ -44,6 +47,9 @@ importers:
       '@mini-dsh/plugin-greeter':
         specifier: workspace:*
         version: link:../../packages/plugins/greeter
+      '@mini-dsh/plugin-presets-demo':
+        specifier: workspace:*
+        version: link:../../packages/plugins/presets-demo
       '@mini-dsh/plugin-task-runner':
         specifier: workspace:*
         version: link:../../packages/plugins/task-runner
@@ -90,6 +96,31 @@ importers:
         specifier: workspace:*
         version: link:../webserver
 
+  packages/host/session-manager:
+    dependencies:
+      '@deepseek-ai/cordis':
+        specifier: ^4.0.1
+        version: 4.0.1
+      '@mini-dsh/plugin-counter':
+        specifier: workspace:*
+        version: link:../../plugins/counter
+      '@mini-dsh/plugin-greeter':
+        specifier: workspace:*
+        version: link:../../plugins/greeter
+      '@mini-dsh/plugin-tool-bash':
+        specifier: workspace:*
+        version: link:../../plugins/tool-bash
+      '@types/js-yaml':
+        specifier: ^4.0.9
+        version: 4.0.9
+      js-yaml:
+        specifier: ^4.1.0
+        version: 4.3.1
+    devDependencies:
+      '@mini-dsh/host-webserver':
+        specifier: workspace:*
+        version: link:../webserver
+
   packages/host/webserver:
     dependencies:
       '@deepseek-ai/cordis':
@@ -127,6 +158,25 @@ importers:
       '@mini-dsh/host-webserver':
         specifier: workspace:*
         version: link:../../host/webserver
+
+  packages/plugins/presets-demo:
+    dependencies:
+      '@deepseek-ai/cordis':
+        specifier: ^4.0.1
+        version: 4.0.1
+      '@mini-dsh/host-session-manager':
+        specifier: workspace:*
+        version: link:../../host/session-manager
+    devDependencies:
+      '@mini-dsh/plugin-counter':
+        specifier: workspace:*
+        version: link:../counter
+      '@mini-dsh/plugin-greeter':
+        specifier: workspace:*
+        version: link:../greeter
+      '@mini-dsh/plugin-tool-bash':
+        specifier: workspace:*
+        version: link:../tool-bash
 
   packages/plugins/task-runner:
     dependencies:

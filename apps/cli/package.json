@@ -19,6 +19,8 @@
     "@mini-dsh/seam-executor": "workspace:*",
     "@mini-dsh/provider-executor-local": "workspace:*",
     "@mini-dsh/provider-executor-sandbox": "workspace:*",
-    "@mini-dsh/plugin-tool-bash": "workspace:*"
+    "@mini-dsh/plugin-tool-bash": "workspace:*",
+    "@mini-dsh/host-session-manager": "workspace:*",
+    "@mini-dsh/plugin-presets-demo": "workspace:*"
   }
 }

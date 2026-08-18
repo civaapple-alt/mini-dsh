@@ -1,0 +1,8 @@
+# ==========================================================
+# Mini-DSH Agent Preset: minimal (极简模式)
+# ==========================================================
+# 专为高频极简任务设计：极短 Prompt，仅提供 Bash 执行工具。
+
+persona: "You are a minimal assistant. Be concise."
+tools:
+  - '@mini-dsh/plugin-tool-bash'

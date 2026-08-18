@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.4.0] - 2026-08-18
+
+### Added (会话级 Presets 与多租户作用域隔离)
+- **`presets/` 独立配置体系**：
+  - 新增 `presets/minimal.yml`（极简模式预设，仅分配 ToolBash 与精简 Prompt）。
+  - 新增 `presets/standard.yml`（标准全功能模式预设，分配 Greeter + Counter + ToolBash）。
+- **`@mini-dsh/host-session-manager` 会话管理插件**：
+  - 注册 `ctx.sessions` 服务，支持基于 Cordis `ctx.isolate()` 派生隔离的 Session 子上下文。
+  - 自动将 Preset 声明的工具与 Persona 装配到会话作用域内，杜绝多会话工具泄漏。
+  - 提供 `/api/presets`、`/api/sessions`、`/api/sessions/create` 完整的会话管理 REST API。
+- **`@mini-dsh/plugin-presets-demo` 多会话隔离验证插件**：
+  - 在同一 Node.js 进程中并发创建 `minimal` 与 `standard` 两个会话，严格验证各自的工具与人设隔离性。
+- **新增 Profile 与命令**：
+  - 新增 `profiles/presets.yml` 与 `pnpm start:presets` 快速运行验证。
+
+---
+
 ## [0.3.0] - 2026-08-18
 
 ### Added (Capability Seam 与可移植执行世界)

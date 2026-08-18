@@ -19,3 +19,7 @@
   config:
     initialCount: 0
 
+- name: '@mini-dsh/provider-executor-local'
+
+- name: '@mini-dsh/host-session-manager'
+

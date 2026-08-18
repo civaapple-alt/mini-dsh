@@ -1,0 +1,10 @@
+# ==========================================================
+# Mini-DSH Agent Preset: standard (标准全功能模式)
+# ==========================================================
+# 标准开发助手：完整 Prompt，提供问候、计数器、Bash 全套工具。
+
+persona: "You are a standard software engineer assistant with full toolset."
+tools:
+  - '@mini-dsh/plugin-greeter'
+  - '@mini-dsh/plugin-counter'
+  - '@mini-dsh/plugin-tool-bash'

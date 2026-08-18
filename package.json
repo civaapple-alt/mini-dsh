@@ -12,6 +12,7 @@
     "start:task": "tsx apps/cli/src/index.ts --profile base --task",
     "start:local": "tsx apps/cli/src/index.ts --profile local",
     "start:sandbox": "tsx apps/cli/src/index.ts --profile sandbox",
+    "start:presets": "tsx apps/cli/src/index.ts --profile presets",
     "dev": "pnpm run build && pnpm start"
   },
   "devDependencies": {

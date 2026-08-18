@@ -1,0 +1,11 @@
+# ==========================================================
+# Mini-DSH Profile: presets (Multi-Session Presets Demo)
+# ==========================================================
+# Demonstrates hosting multiple concurrent sessions with
+# different Presets (minimal vs standard) in the SAME process.
+
+- name: '@mini-dsh/provider-executor-local'
+
+- name: '@mini-dsh/host-session-manager'
+
+- name: '@mini-dsh/plugin-presets-demo'

@@ -42,11 +42,15 @@ mini-dsh/
 ├── package.json                   # 根目录配置与工作区脚本
 ├── pnpm-workspace.yaml            # pnpm monorepo 配置
 ├── tsconfig.base.json             # 基础 TypeScript 配置
-├── profiles/                      # Cordis Profile 配置文件
+├── profiles/                      # 【部署级 Profile】：全局基础设施组装 (Web/Base/Local/Sandbox)
 │   ├── base.yml                   # Headless 模式（仅基础后端插件与任务运行器）
 │   ├── web.yml                    # Web GUI 模式（包含 Web 服务与全栈 UI 插件）
 │   ├── local.yml                  # 本地执行世界 Profile（LocalExecutor + ToolBash）
-│   └── sandbox.yml                # 安全沙箱执行世界 Profile（SandboxExecutor + ToolBash）
+│   ├── sandbox.yml                # 安全沙箱执行世界 Profile（SandboxExecutor + ToolBash）
+│   └── presets.yml                # 多会话隔离演示 Profile（SessionManager + PresetsDemo）
+├── presets/                       # 【会话级 Preset】：用户在每个 Chat 独享的 Agent 预设
+│   ├── minimal.yml                # 极简模式：仅分配 ToolBash 与精简 Prompt
+│   └── standard.yml               # 标准模式：分配 Greeter + Counter + ToolBash 全套工具
 ├── apps/
 │   └── cli/                       # Host 启动入口 (支持 --profile 和 --task 参数)
 └── packages/
@@ -57,7 +61,8 @@ mini-dsh/
     │   └── executor-sandbox/      # 远程安全沙箱提供方 (@mini-dsh/provider-executor-sandbox)
     ├── host/
     │   ├── webserver/             # Host HTTP 服务插件 (ctx.server)
-    │   └── client-modules/        # Client 模块扫描与 Bundle 分发 (ctx.clientModules)
+    │   ├── client-modules/        # Client 模块扫描与 Bundle 分发 (ctx.clientModules)
+    │   └── session-manager/       # 会话管理与 Preset 子上下文隔离 (ctx.sessions)
     ├── client/
     │   ├── slots/                 # 浏览器 UI 插槽系统 (ctx.slots)
     │   └── shell/                 # 浏览器 Cordis 引导内核 (AppWebEntry)
@@ -65,7 +70,8 @@ mini-dsh/
         ├── greeter/               # 问候服务全栈插件 (后端 API + 前端卡片)
         ├── counter/               # 计数器全栈插件 (后端状态 + 前端组件)
         ├── tool-bash/             # 面向模型的 Bash 工具插件 (Consumer)
-        └── task-runner/           # Headless 任务运行器插件 (多步骤工作流编排与事件发射)
+        ├── task-runner/           # Headless 任务运行器插件 (多步骤工作流编排与事件发射)
+        └── presets-demo/          # 多会话作用域隔离演示插件
 ```
 
 ---
@@ -95,6 +101,7 @@ pnpm start
 - 你将看到浏览器端 Cordis 容器自动激活。
 - `@mini-dsh/plugin-greeter` 自动将问候卡片挂载到 **`main.cards`** 插槽，并在点击时请求 Host 的 `GET /api/greet`。
 - `@mini-dsh/plugin-counter` 自动将计数器组件挂载到 **`sidebar.widgets`** 插槽，并在点击时请求 Host 的 `POST /api/count`。
+- 提供 `/api/presets` 与 `/api/sessions/create` 接口支持按预设动态创建新会话。
 
 ---
 
@@ -129,7 +136,21 @@ pnpm start:sandbox
 
 ---
 
-### 5. 验证 “Everything is a plugin” 的可插拔性
+### 5. 运行多会话隔离实验（Per-Session Presets 极简 vs 标准模式）
+
+验证在**同一个 Node.js 进程**中，两个不同 Preset 的会话如何通过 Cordis 子上下文（`isolate`）实现能力隔离：
+
+```bash
+pnpm start:presets
+```
+
+**控制台隔离结果对比：**
+* **Session A (`minimal`)**：Prompt 为极简指令，工具池仅拥有 `['tool-bash']`，`ctx.counter` 处于隔离排除状态；
+* **Session B (`standard`)**：Prompt 为全功能指令，完整装配 `['greeter', 'counter', 'tool-bash']`。
+
+---
+
+### 6. 验证 “Everything is a plugin” 的可插拔性
 
 #### 实验 A：在配置文件中禁用一个插件
 打开 `profiles/web.yml`，在 `plugin-counter` 节点下增加 `disabled: true`：
