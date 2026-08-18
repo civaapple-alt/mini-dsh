@@ -127,3 +127,9 @@ pnpm start:base
 ```
 - 观察 `task-runner`：自动检测到 `counter` 缺失，执行降级逻辑，依然稳定完成工作流！
 
+---
+
+## 许可证 (License)
+
+本项目采用 [MIT 许可证](LICENSE)。
+
