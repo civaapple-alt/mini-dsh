@@ -254,18 +254,17 @@ export class ClientModuleService extends Service {
     <main>
       <!-- Preset & Multi-Session Switcher -->
       <div class="card" style="background: #1e293b; border: 1px solid #10b981; margin-bottom: 1.5rem;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.75rem;">
           <div>
-            <h3 style="color: #34d399; font-size: 1.15rem; margin-bottom: 0.25rem;">🧩 Agent Preset & Session Scope Switcher (会话级预设)</h3>
+            <h3 style="color: #34d399; font-size: 1.15rem; margin-bottom: 0.25rem;">🧩 Agent Preset & Session Scope Switcher (会话级预设与隔离)</h3>
             <small style="color: var(--text-muted);">基于 Cordis <code>ctx.isolate()</code> 实现同进程内不同用户会话的人设与工具池隔离</small>
           </div>
           <div style="display: flex; gap: 0.5rem; align-items: center;">
-            <select id="preset-select" style="background: #0f172a; border: 1px solid #334155; color: #f8fafc; padding: 0.45rem 0.8rem; border-radius: 0.375rem; font-size: 0.85rem;">
-              <option value="minimal">⚡ 极简模式 (Minimal: 仅 ToolBash)</option>
-              <option value="standard" selected>🌟 标准模式 (Standard: 全套工具)</option>
-            </select>
-            <button id="create-session-btn" style="background: #059669; font-size: 0.85rem; padding: 0.45rem 0.9rem;">
-              + 创建并切换会话
+            <button id="btn-preset-minimal" onclick="window.__selectPreset('minimal')" style="background: #78350f; border: 1px solid #d97706; color: #fde68a; font-size: 0.85rem; padding: 0.4rem 0.8rem;">
+              ⚡ 切换极简模式 (Minimal)
+            </button>
+            <button id="btn-preset-standard" onclick="window.__selectPreset('standard')" style="background: #065f46; border: 1px solid #059669; color: #a7f3d0; font-size: 0.85rem; padding: 0.4rem 0.8rem;">
+              🌟 切换标准模式 (Standard)
             </button>
           </div>
         </div>
@@ -274,9 +273,9 @@ export class ClientModuleService extends Service {
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
             <div>
               <span style="color: #94a3b8; font-size: 0.85rem;">当前活跃会话 ID:</span>
-              <code id="active-session-id" style="color: #38bdf8; font-weight: 600; margin-left: 0.4rem;">loading...</code>
+              <code id="active-session-id" style="color: #38bdf8; font-weight: 600; margin-left: 0.4rem; background: #1e293b; padding: 0.2rem 0.4rem; border-radius: 0.25rem;">loading...</code>
             </div>
-            <span id="active-preset-badge" class="badge" style="background: #065f46; color: #a7f3d0; border-color: #059669;">
+            <span id="active-preset-badge" class="badge" style="background: #065f46; color: #a7f3d0; border-color: #059669; font-weight: 600;">
               Preset: standard
             </span>
           </div>
@@ -289,7 +288,7 @@ export class ClientModuleService extends Service {
           </div>
 
           <div style="margin-bottom: 1rem;">
-            <div style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 0.35rem;">🛠️ 该会话专属隔离挂载的工具服务池:</div>
+            <div style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 0.35rem;">🛠️ 该会话专属隔离挂载的工具服务池 (Scoped Tool Registry):</div>
             <div id="active-tools-list" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
               <span class="badge">Loading tools...</span>
             </div>
@@ -297,20 +296,20 @@ export class ClientModuleService extends Service {
 
           <div style="border-top: 1px dashed #334155; padding-top: 0.75rem;">
             <div style="font-size: 0.8rem; color: #cbd5e1; margin-bottom: 0.5rem; font-weight: 600;">
-              🧪 隔离性实时验证（点击尝试在该会话内调用具体工具）：
+              🧪 隔离性实时验证（点击测试当前会话是否能访问目标工具服务）：
             </div>
             <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.75rem;">
-              <button onclick="window.__invokeTool('greeter')" style="background: #2563eb; font-size: 0.8rem; padding: 0.35rem 0.7rem;">
+              <button onclick="window.__invokeTool('greeter')" style="background: #2563eb; font-size: 0.8rem; padding: 0.4rem 0.75rem;">
                 👉 调用 Greeter 工具
               </button>
-              <button onclick="window.__invokeTool('counter')" style="background: #0d9488; font-size: 0.8rem; padding: 0.35rem 0.7rem;">
+              <button onclick="window.__invokeTool('counter')" style="background: #0d9488; font-size: 0.8rem; padding: 0.4rem 0.75rem;">
                 👉 调用 Counter 工具
               </button>
-              <button onclick="window.__invokeTool('toolBash')" style="background: #7c3aed; font-size: 0.8rem; padding: 0.35rem 0.7rem;">
+              <button onclick="window.__invokeTool('toolBash')" style="background: #7c3aed; font-size: 0.8rem; padding: 0.4rem 0.75rem;">
                 👉 调用 ToolBash 工具
               </button>
             </div>
-            <div id="tool-invoke-result" style="display: none; background: #1e293b; border-radius: 0.375rem; padding: 0.6rem; font-size: 0.85rem; border: 1px solid #334155;"></div>
+            <div id="tool-invoke-result" style="display: none; background: #1e293b; border-radius: 0.375rem; padding: 0.75rem; font-size: 0.85rem; border: 1px solid #334155;"></div>
           </div>
         </div>
       </div>
@@ -325,24 +324,12 @@ export class ClientModuleService extends Service {
   <script>
     let currentSessionId = null;
 
+    window.__selectPreset = async function(preset) {
+      await switchSession(preset);
+    };
+
     async function initPresets() {
-      try {
-        const res = await fetch('/api/presets');
-        const presets = await res.json();
-        const select = document.getElementById('preset-select');
-        if (select && Array.isArray(presets) && presets.length > 0) {
-          select.innerHTML = presets.map(p => 
-            \`<option value="\${p.name}">\${p.name === 'minimal' ? '⚡ 极简模式 (Minimal: 仅 ToolBash)' : '🌟 标准模式 (Standard: 全套工具)'}</option>\`
-          ).join('');
-        }
-      } catch (e) {}
-
       await switchSession('standard');
-
-      document.getElementById('create-session-btn')?.addEventListener('click', () => {
-        const select = document.getElementById('preset-select');
-        if (select) switchSession(select.value);
-      });
     }
 
     async function switchSession(preset) {
@@ -384,21 +371,27 @@ export class ClientModuleService extends Service {
       resultEl.innerHTML = '<span style="color: #94a3b8;">Invoking tool in session scope...</span>';
 
       try {
+        const startTime = Date.now();
         const res = await fetch('/api/sessions/invoke', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ sessionId: currentSessionId, toolName, args: { name: 'Web Explorer', command: 'node -v' } })
         });
         const data = await res.json();
+        const duration = Date.now() - startTime;
+
         if (data.success) {
           resultEl.innerHTML = \`
-            <div style="color: #4ade80; font-weight: 600;">✓ [Success] Tool "\${toolName}" executed in session:</div>
-            <pre style="margin-top: 0.35rem; color: #f8fafc; font-size: 0.8rem; background: #0f172a; padding: 0.5rem; border-radius: 0.25rem;">\${JSON.stringify(data.result || { count: data.count }, null, 2)}</pre>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+              <span style="color: #4ade80; font-weight: 600;">✓ [Success] Tool "\${toolName}" invoked successfully in session:</span>
+              <span style="color: #64748b; font-size: 0.75rem;">\${duration}ms</span>
+            </div>
+            <pre style="margin-top: 0.35rem; color: #f8fafc; font-size: 0.8rem; background: #0f172a; padding: 0.5rem; border-radius: 0.25rem; overflow-x: auto;">\${typeof data.result === 'string' ? data.result : JSON.stringify(data.result || { count: data.count }, null, 2)}</pre>
           \`;
         } else {
           resultEl.innerHTML = \`
-            <div style="color: #f87171; font-weight: 600;">🚫 [Rejected by Scope Isolation]:</div>
-            <div style="margin-top: 0.25rem; color: #fca5a5;">\${data.error}</div>
+            <div style="color: #f87171; font-weight: 600; margin-bottom: 0.25rem;">🚫 [Rejected by Scope Isolation]:</div>
+            <div style="color: #fca5a5; font-size: 0.85rem;">\${data.error}</div>
           \`;
         }
       } catch (err) {

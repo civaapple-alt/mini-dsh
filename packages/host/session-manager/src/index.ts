@@ -176,10 +176,11 @@ export function apply(ctx: Context) {
                 return res.end(JSON.stringify({ success: false, error: `Session "${sessionId}" not found` }))
               }
 
-              const sCtx = session.sessionCtx as any
+              const sCtx = session.sessionCtx as Context
 
               if (toolName === 'greeter') {
-                if (!sCtx.greeter) {
+                const greeter = sCtx.get('greeter')
+                if (!greeter) {
                   res.writeHead(200, { 'Content-Type': 'application/json' })
                   return res.end(JSON.stringify({
                     success: false,
@@ -187,13 +188,14 @@ export function apply(ctx: Context) {
                     error: `❌ Tool "greeter" is NOT mounted in Preset "${session.presetName}" (Scope Isolated)`
                   }))
                 }
-                const msg = sCtx.greeter.greet(args?.name || 'Agent User')
+                const msg = greeter.greet(args?.name || 'Agent User')
                 res.writeHead(200, { 'Content-Type': 'application/json' })
                 return res.end(JSON.stringify({ success: true, result: msg }))
               }
 
               if (toolName === 'counter') {
-                if (!sCtx.counter) {
+                const counter = sCtx.get('counter')
+                if (!counter) {
                   res.writeHead(200, { 'Content-Type': 'application/json' })
                   return res.end(JSON.stringify({
                     success: false,
@@ -201,21 +203,22 @@ export function apply(ctx: Context) {
                     error: `❌ Tool "counter" is NOT mounted in Preset "${session.presetName}" (Scope Isolated)`
                   }))
                 }
-                const count = sCtx.counter.increment(args?.delta || 1)
+                const count = counter.increment(args?.delta || 1)
                 res.writeHead(200, { 'Content-Type': 'application/json' })
                 return res.end(JSON.stringify({ success: true, count }))
               }
 
               if (toolName === 'toolBash') {
-                if (!sCtx.toolBash) {
+                const toolBash = sCtx.get('toolBash')
+                if (!toolBash) {
                   res.writeHead(200, { 'Content-Type': 'application/json' })
                   return res.end(JSON.stringify({
                     success: false,
                     scopedOut: true,
-                    error: `❌ Tool "toolBash" is NOT mounted in Preset "${session.presetName}"`
+                    error: `❌ Tool "toolBash" is NOT mounted in Preset "${session.presetName}" (Scope Isolated)`
                   }))
                 }
-                const result = await sCtx.toolBash.execute(args?.command || 'node -v')
+                const result = await toolBash.execute(args?.command || 'node -v')
                 res.writeHead(200, { 'Content-Type': 'application/json' })
                 return res.end(JSON.stringify({ success: true, result }))
               }
