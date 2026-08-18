@@ -12,13 +12,19 @@ interface ProfileEntry {
 function parseArgs() {
   const args = process.argv.slice(2)
   let profile = 'web'
+  let task = ''
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--profile' && args[i + 1]) {
       profile = args[i + 1]
       i++
+    } else if (args[i] === '--task' && args[i + 1]) {
+      task = args[i + 1]
+      i++
+    } else if (!args[i].startsWith('-') && !task) {
+      task = args[i]
     }
   }
-  return { profile }
+  return { profile, task }
 }
 
 async function resolvePlugin(name: string) {
@@ -30,11 +36,14 @@ async function resolvePlugin(name: string) {
 }
 
 async function main() {
-  const { profile } = parseArgs()
+  const { profile, task } = parseArgs()
   const profilePath = path.resolve(process.cwd(), `profiles/${profile}.yml`)
 
   console.log('='.repeat(60))
   console.log(`\x1b[1m\x1b[36m🚀 Mini-DSH Starting with Profile: "${profile}"\x1b[0m`)
+  if (task) {
+    console.log(`\x1b[1m\x1b[32m🎯 Custom Task:\x1b[0m "${task}"`)
+  }
   console.log(`📂 Profile Config: ${profilePath}`)
   console.log('='.repeat(60))
 
@@ -61,10 +70,15 @@ async function main() {
       continue
     }
 
+    let config = entry.config
+    if (task && entry.name === '@mini-dsh/plugin-task-runner') {
+      config = { ...config, taskName: task }
+    }
+
     console.log(`\x1b[33m[Cordis Loader]\x1b[0m Applying plugin: ${entry.name}`)
     try {
       const pluginMod = await resolvePlugin(entry.name)
-      await ctx.plugin(pluginMod, entry.config)
+      await ctx.plugin(pluginMod, config)
     } catch (err: any) {
       console.error(`\x1b[31m[Cordis Loader] Error applying ${entry.name}:\x1b[0m`, err)
     }

@@ -44,6 +44,9 @@ importers:
       '@mini-dsh/plugin-greeter':
         specifier: workspace:*
         version: link:../../packages/plugins/greeter
+      '@mini-dsh/plugin-task-runner':
+        specifier: workspace:*
+        version: link:../../packages/plugins/task-runner
       '@types/js-yaml':
         specifier: ^4.0.9
         version: 4.0.9
@@ -112,6 +115,19 @@ importers:
       '@mini-dsh/host-webserver':
         specifier: workspace:*
         version: link:../../host/webserver
+
+  packages/plugins/task-runner:
+    dependencies:
+      '@deepseek-ai/cordis':
+        specifier: ^4.0.1
+        version: 4.0.1
+    devDependencies:
+      '@mini-dsh/plugin-counter':
+        specifier: workspace:*
+        version: link:../counter
+      '@mini-dsh/plugin-greeter':
+        specifier: workspace:*
+        version: link:../greeter
 
 packages:
 

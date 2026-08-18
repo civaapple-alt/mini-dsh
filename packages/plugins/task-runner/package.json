@@ -1,0 +1,17 @@
+{
+  "name": "@mini-dsh/plugin-task-runner",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@deepseek-ai/cordis": "^4.0.1"
+  },
+  "devDependencies": {
+    "@mini-dsh/plugin-greeter": "workspace:*",
+    "@mini-dsh/plugin-counter": "workspace:*"
+  }
+}

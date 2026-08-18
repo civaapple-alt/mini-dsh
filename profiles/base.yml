@@ -11,3 +11,11 @@
 - name: '@mini-dsh/plugin-counter'
   config:
     initialCount: 100
+
+- name: '@mini-dsh/plugin-task-runner'
+  config:
+    taskName: "Deploy Mini-DSH Headless Task"
+    targetUser: "Agent Engineer"
+    iterations: 3
+    autoRun: true
+    exitOnComplete: false

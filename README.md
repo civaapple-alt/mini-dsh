@@ -43,10 +43,10 @@ mini-dsh/
 ├── pnpm-workspace.yaml            # pnpm monorepo 配置
 ├── tsconfig.base.json             # 基础 TypeScript 配置
 ├── profiles/                      # Cordis Profile 配置文件
-│   ├── base.yml                   # Headless 模式（仅后端插件，无 Web 服务）
+│   ├── base.yml                   # Headless 模式（仅后端插件与任务运行器，无 Web 服务）
 │   └── web.yml                    # Web GUI 模式（包含 Web 服务与全栈 UI 插件）
 ├── apps/
-│   └── cli/                       # Host 启动入口 (支持 --profile 参数)
+│   └── cli/                       # Host 启动入口 (支持 --profile 和 --task 参数)
 └── packages/
     ├── host/
     │   ├── webserver/             # Host HTTP 服务插件 (ctx.server)
@@ -56,7 +56,8 @@ mini-dsh/
     │   └── shell/                 # 浏览器 Cordis 引导内核 (AppWebEntry)
     └── plugins/
         ├── greeter/               # 问候服务全栈插件 (后端 API + 前端卡片)
-        └── counter/               # 计数器全栈插件 (后端状态 + 前端组件)
+        ├── counter/               # 计数器全栈插件 (后端状态 + 前端组件)
+        └── task-runner/           # Headless 任务运行器插件 (多步骤工作流编排与事件发射)
 ```
 
 ---
@@ -69,7 +70,7 @@ mini-dsh/
 # 1. 在 mini-dsh 目录下安装依赖
 pnpm install
 
-# 2. 构建所有前端 Client Bundle
+# 2. 构建所有前端 Client Bundle 与 TypeScript 产物
 pnpm run build
 ```
 
@@ -89,7 +90,25 @@ pnpm start
 
 ---
 
-### 3. 验证 “Everything is a plugin” 的可插拔性
+### 3. 运行 Headless 模式（对标真实 Agent 运行器）
+
+```bash
+# 运行 base profile 下的默认多步骤任务
+pnpm start:base
+
+# 或者动态传入自定义任务指令 (模拟 dsh --profile headless "task")
+pnpm start:task "Nightly Security Audit and Build"
+```
+
+**控制台输出过程**：
+1. Cordis 自动加载 `greeter`、`counter` 与 `task-runner`；
+2. `task-runner` 响应式注入所需服务，执行多步骤工作流（Step 1: 上下文初始化 $\to$ Step 2~N: 状态推进）；
+3. 过程广播 `task/start`、`task/step`、`task/complete` 类型化事件；
+4. 打印任务耗时与状态 Summary 并排空事件循环退出。
+
+---
+
+### 4. 验证 “Everything is a plugin” 的可插拔性
 
 #### 实验 A：在配置文件中禁用一个插件
 打开 `profiles/web.yml`，在 `plugin-counter` 节点下增加 `disabled: true`：
@@ -101,8 +120,10 @@ pnpm start
 - 观察终端日志：`Counter` 插件未加载，未注册 `/api/count` 路由。
 - 观察网页：`sidebar.widgets` 插槽中的计数器组件**完全消失**，系统其他功能丝毫不受影响。
 
-#### 实验 B：运行 Headless 模式（Base Profile）
+#### 实验 B：验证 Headless 优雅降级
+打开 `profiles/base.yml`，将 `@mini-dsh/plugin-counter` 设为 `disabled: true`：
 ```bash
-pnpm run start:base
+pnpm start:base
 ```
-- 该模式下只加载 `plugin-greeter` 和 `plugin-counter` 的纯后端能力，不启动 Web 服务，控制台输出清晰的 Service 注入与初始化流程。
+- 观察 `task-runner`：自动检测到 `counter` 缺失，执行降级逻辑，依然稳定完成工作流！
+

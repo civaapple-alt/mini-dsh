@@ -8,6 +8,7 @@
     "build": "pnpm -r --filter=\"./packages/**\" run build",
     "start": "tsx apps/cli/src/index.ts --profile web",
     "start:base": "tsx apps/cli/src/index.ts --profile base",
+    "start:task": "tsx apps/cli/src/index.ts --profile base --task",
     "dev": "pnpm run build && pnpm start"
   },
   "devDependencies": {

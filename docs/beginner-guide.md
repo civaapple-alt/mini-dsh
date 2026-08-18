@@ -279,3 +279,4 @@ Mini-DSH 严格复刻了 DeepSeek Harness 官方的架构模式。下表为两�
 | **浏览器引导内核** | `packages/client/shell` | [`packages/client/web`](file:///d:/gh-ws/dsh-ws/deepseek-harness/packages/client/web/README.md) (`AppWebEntry`) | 浏览器端初始化 Cordis 容器并动态 import 插件 |
 | **UI 插槽底座** | `packages/client/slots` | [`packages/client/ui-slots`](file:///d:/gh-ws/dsh-ws/deepseek-harness/packages/client/ui-slots/README.md) (`ctx.slots`) | 提供通用的 `register(slotName, Component)` 插槽解耦机制 |
 | **全栈插件结构** | `packages/plugins/*` (`src/index.ts` + `src/client.ts`) | `packages/*` (`packages/goal/goal-local` + `packages/client/ui-goal`) | 自包含前后端逻辑，通过 Profile 配置实现插拔 |
+| **Headless 任务运行器** | `packages/plugins/task-runner` | [`packages/core/agent-loop`](file:///d:/gh-ws/dsh-ws/deepseek-harness/packages/core/agent-loop/README.md) + [`packages/bundle/headless`](file:///d:/gh-ws/dsh-ws/deepseek-harness/packages/bundle/headless/README.md) | 多步骤工作流调度、服务依赖装配、事件发射与收尾 |
